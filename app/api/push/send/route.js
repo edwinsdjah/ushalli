@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
-import connect from "@/src/lib/mongoose";
-import Subscription from "@/src/models/Subscription";
-import { sendPush } from "@/src/lib/push";
+import connect from "@/lib/mongoose";
+import Subscription from "@/models/Subscription";
+import { sendPush } from "@/lib/push";
 
 export async function POST(req) {
   try {
