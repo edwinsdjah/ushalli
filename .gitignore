@@ -1,3 +1,7 @@
 node_modules
 
 .env
+/.next/dev/static/media
+/.next/dev/static/chunks
+/.next/dev/server/chunks/ssr
+/.next/dev
