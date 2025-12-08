@@ -1,4 +1,4 @@
-import mongoose from 'mongoose';
+import mongoose from "mongoose";
 
 const PrayerTimesSchedule = new mongoose.Schema(
   {
@@ -16,7 +16,21 @@ const PrayerTimesSchedule = new mongoose.Schema(
       maghrib: String,
       isha: String,
       sunrise: String,
-      // tambahkan yang lain jika perlu
+    },
+    timingsEpoch: {
+      fajr: Number,
+      dhuhr: Number,
+      asr: Number,
+      maghrib: Number,
+      isha: Number,
+      sunrise: Number,
+    },
+    notificationsSent: {
+      fajr: { type: Boolean, default: false },
+      dhuhr: { type: Boolean, default: false },
+      asr: { type: Boolean, default: false },
+      maghrib: { type: Boolean, default: false },
+      isha: { type: Boolean, default: false },
     },
     source: { type: String }, // mis. "aladhan"
     createdAt: { type: Date, default: () => new Date() },
@@ -27,4 +41,4 @@ const PrayerTimesSchedule = new mongoose.Schema(
 );
 
 export default mongoose.models.PrayerTimes ||
-  mongoose.model('PrayerTimes', PrayerTimesSchema);
+  mongoose.model("PrayerTimes", PrayerTimesSchedule);

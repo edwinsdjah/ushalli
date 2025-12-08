@@ -1,4 +1,4 @@
-import mongoose from 'mongoose';
+import mongoose from "mongoose";
 
 const SubscriptionSchema = new mongoose.Schema(
   {
@@ -23,4 +23,4 @@ const SubscriptionSchema = new mongoose.Schema(
 
 // Avoid model overwrite in dev (Next hot reload)
 export default mongoose.models.Subscription ||
-  mongoose.model('Subscription', SubscriptionSchema);
+  mongoose.model("Subscription", SubscriptionSchema);
