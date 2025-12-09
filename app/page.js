@@ -1,4 +1,5 @@
 "use client";
+
 import { useEffect, useState } from "react";
 import NotificationToggle from "@/app/Components/NotificationToggle";
 import NotificationModal from "./Components/NotificationModal";
@@ -6,6 +7,8 @@ import LocationModal from "./Components/LocationModal";
 import usePushNotification from "./hooks/usePushNotification";
 import useUserLocation from "./hooks/useUserLocation";
 import { getOrCreateUserId } from "@/helpers/user";
+import { useLocationContext } from "@/app/context/locationContext";
+import Link from "next/link";
 
 export default function Home() {
   // PUSH NOTIFICATION HOOK
@@ -27,10 +30,38 @@ export default function Home() {
     ignoreLocation,
   } = useUserLocation();
 
+  // LOCATION CONTEXT
+  const { coords: ctxCoords, setCoords } = useLocationContext();
+
   const [prayers, setPrayers] = useState(null);
 
+  // ⬅️ DEBUG: apakah context berubah?
+  useEffect(() => {
+    console.log("Context coords →", ctxCoords);
+  }, [ctxCoords]);
+
+  // 🔥 UPDATE CONTEXT SAAT HOOK MENGHASILKAN KOORDINAT
+  useEffect(() => {
+    if (!coords) {
+      console.log("Home → coords dari hook masih null");
+      return;
+    }
+
+    // Cegah setCoords berulang jika datanya sama
+    if (
+      !ctxCoords ||
+      ctxCoords.lat !== coords.lat ||
+      ctxCoords.lon !== coords.lon
+    ) {
+      console.log("Home → MENYIMPAN KE CONTEXT:", coords);
+      setCoords(coords);
+    }
+  }, [coords, ctxCoords, setCoords]);
+
+  // FETCH JADWAL SHOLAT
   useEffect(() => {
     if (!coords || !userId) return;
+
     (async () => {
       try {
         const res = await fetch("/api/prayer-times", {
@@ -48,10 +79,6 @@ export default function Home() {
 
         if (json?.data?.timings) {
           setPrayers(json.data.timings);
-        } else {
-          console.log("timings dari API:", json.data.timings);
-          console.warn("Tidak ada timings dari API");
-          console.log("Full response:", json);
         }
       } catch (err) {
         console.error("Failed fetching prayer times", err);
@@ -59,13 +86,23 @@ export default function Home() {
     })();
   }, [coords]);
 
+  useEffect(() => {
+    console.log("HOOK coords:", coords);
+    console.log("CONTEXT BEFORE:", ctxCoords);
+
+    if (coords) {
+      console.log("SETTING CTX:", coords);
+      setCoords(coords);
+    }
+  }, [coords]);
+
   return (
     <>
       {/* 🔔 Modal pertama kali untuk push notification */}
       <NotificationModal
-        open={permission === "default"} // muncul jika belum pernah pilih
+        open={permission === "default"}
         onAllow={subscribeToPush}
-        onIgnore={() => Notification.requestPermission()} // supaya modal hilang
+        onIgnore={() => Notification.requestPermission()}
         loading={pushLoading}
       />
 
@@ -107,6 +144,7 @@ export default function Home() {
 
           {/* 🔔 Toggle hanya untuk UI setelah user memberi izin */}
           <NotificationToggle isSubscribed={isSubscribed} />
+          <Link href={"/compass"}>Klik</Link>
         </main>
       </div>
     </>
