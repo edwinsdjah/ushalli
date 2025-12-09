@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 
-export default function NotificationModal({ subscribeToPush }) {
+export default function NotificationModal({ onAllow, onIgnore, open }) {
   const [show, setShow] = useState(false);
 
   useEffect(() => {
@@ -19,7 +19,7 @@ export default function NotificationModal({ subscribeToPush }) {
   }
 
   async function handleAllow() {
-    await subscribeToPush();
+    await onAllow();
     closeModal();
   }
 

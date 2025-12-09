@@ -2,6 +2,7 @@ import mongoose from "mongoose";
 
 const PrayerTimesSchedule = new mongoose.Schema(
   {
+    userId: { type: String, required: true },
     date: { type: String, required: true }, // simpan format ISO atau YYYY-MM-DD
     timezone: { type: String },
     location: {
