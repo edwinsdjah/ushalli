@@ -5,7 +5,6 @@ import PrayerTimes from "@/models/PrayerTimes";
 import { sendPush } from "@/lib/push";
 
 const SECRET = process.env.PUSH_SERVER_SECRET;
-const WINDOW_SECONDS = parseInt(process.env.CRON_WINDOW_SECONDS || "300", 10);
 
 export async function POST(req) {
   try {
@@ -18,27 +17,15 @@ export async function POST(req) {
 
     await connect();
 
-    // 1️⃣ Reset notificationsSent hari ini
     const today = new Date().toLocaleDateString("en-CA");
-    await PrayerTimes.updateMany(
-      { date: today },
-      {
-        $set: {
-          "notificationsSent.fajr": false,
-          "notificationsSent.dhuhr": false,
-          "notificationsSent.ashar": false,
-          "notificationsSent.maghrib": false,
-          "notificationsSent.isya": false,
-        },
-      }
-    );
 
+    // ⏱ Hitung epoch menit ini (dibulatkan ke bawah)
     const now = Date.now();
-    const windowStart = now;
-    const windowEnd = now + WINDOW_SECONDS * 1000;
+    const currentMinuteEpoch = Math.floor(now / 60000) * 60000;
 
-    // 2️⃣ Ambil jadwal hari ini
+    // Ambil jadwal sholat hari ini
     const todays = await PrayerTimes.find({ date: today }).lean();
+
     const sendResults = [];
 
     for (const pt of todays) {
@@ -47,9 +34,12 @@ export async function POST(req) {
 
       for (const [prayerName, epoch] of Object.entries(timingsEpoch)) {
         if (!epoch) continue;
+
+        // ❌ jangan kirim ulang jika sudah dikirim hari ini
         if (sentFlags[prayerName]) continue;
 
-        if (epoch >= windowStart && epoch <= windowEnd) {
+        // ⏱ kirim hanya jika OR tepat pada menitnya
+        if (epoch === currentMinuteEpoch) {
           const payloadObj = {
             title: `Waktu Sholat ${capitalize(prayerName)}`,
             body: `Sudah masuk waktu ${capitalize(prayerName)}.`,
@@ -81,15 +71,12 @@ export async function POST(req) {
                   await Subscription.deleteOne({ endpoint: s.endpoint });
                 }
 
-                if (!r.ok) console.error("Push error:", r.error);
-
                 return {
                   endpoint: s.endpoint,
                   ok: r.ok,
                   error: r.ok ? null : String(r.error),
                 };
               } catch (err) {
-                console.error("Push exception:", err);
                 return { endpoint: s.endpoint, ok: false, error: String(err) };
               }
             })
@@ -97,7 +84,7 @@ export async function POST(req) {
 
           sendResults.push(...pushResults);
 
-          // Update flag sudah dikirim
+          // tandai sudah kirim — agar tidak ulang
           await PrayerTimes.updateOne(
             { _id: pt._id },
             { $set: { [`notificationsSent.${prayerName}`]: true } }
