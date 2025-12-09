@@ -5,7 +5,7 @@ import PrayerTimes from "@/models/PrayerTimes";
 import { sendPush } from "@/lib/push";
 
 const SECRET = process.env.PUSH_SERVER_SECRET; // set di env
-const WINDOW_SECONDS = parseInt(process.env.CRONT_WINDOW_SECONDS || "60", 10); // window
+const WINDOW_SECONDS = parseInt(process.env.CRONT_WINDOW_SECONDS || "300", 10); // window
 export async function POST(req) {
   try {
     const body = await req.json().catch(() => ({}));
@@ -27,7 +27,9 @@ export async function POST(req) {
     // query: cari dokumen yang punya ANY timingEpoch between windowStart-windowEnd AND notificationsSent.prayerName != true
     // Mongoose can't do "any property" easily — simplest: fetch today's PrayerTimes and filter in JS
     const todayISO = new Date().toISOString().slice(0, 10); // YYYY-MM-DD
-    const todays = await PrayerTimes.find({ date: todayISO }).lean();
+    const today = new Date();
+    const localDate = today.toLocaleDateString("en-CA"); // YYYY-MM-DD
+    const todays = await PrayerTimes.find({ date: localDate }).lean();
 
     const sendResults = [];
 

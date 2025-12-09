@@ -30,9 +30,6 @@ export async function POST(req) {
 
     // Fetch all subscribers
     const subs = await Subscription.find({}).lean();
-    console.log("Subscribers count:", subs.length);
-    console.log("Payload to send:", payload);
-
     const results = [];
 
     for (const s of subs) {
@@ -69,9 +66,7 @@ export async function POST(req) {
         });
       }
     }
-
     console.log("Push results:", results);
-
     return NextResponse.json({ ok: true, results }, { status: 200 });
   } catch (error) {
     console.error("Send push server error:", error);
