@@ -5,6 +5,7 @@ import NotificationModal from "./Components/NotificationModal";
 import LocationModal from "./Components/LocationModal";
 import usePushNotification from "./hooks/usePushNotification";
 import useUserLocation from "./hooks/useUserLocation";
+import { getOrCreateUserId } from "@/helpers/user";
 
 export default function Home() {
   // PUSH NOTIFICATION HOOK
@@ -14,6 +15,8 @@ export default function Home() {
     isSubscribed,
     loading: pushLoading,
   } = usePushNotification();
+
+  const userId = getOrCreateUserId(); // <-- aman
 
   // LOCATION HOOK
   const {
@@ -26,23 +29,29 @@ export default function Home() {
 
   const [prayers, setPrayers] = useState(null);
 
-  //-------------------------------------------
-  //  ⛅ Fetch Jadwal Sholat ketika koordinat berubah
-  //-------------------------------------------
   useEffect(() => {
-    if (!coords) return;
-
+    if (!coords || !userId) return;
     (async () => {
       try {
         const res = await fetch("/api/prayer-times", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify(coords),
+          body: JSON.stringify({
+            lat: coords.lat,
+            lon: coords.lon,
+            userId,
+          }),
         });
 
         const json = await res.json();
+        console.log("API PRAYERS:", json.data);
+
         if (json?.data?.timings) {
           setPrayers(json.data.timings);
+        } else {
+          console.log("timings dari API:", json.data.timings);
+          console.warn("Tidak ada timings dari API");
+          console.log("Full response:", json);
         }
       } catch (err) {
         console.error("Failed fetching prayer times", err);
