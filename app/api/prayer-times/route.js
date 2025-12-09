@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import connect from "@/lib/mongoose";
 import PrayerTimes from "@/models/PrayerTimes";
+import { DateTime } from "luxon";
 
 export async function POST(req) {
   try {
@@ -27,16 +28,7 @@ export async function POST(req) {
       );
     }
 
-    let json;
-    try {
-      json = await response.json();
-    } catch (e) {
-      console.error("Failed to parse JSON:", e);
-      return NextResponse.json(
-        { error: "Invalid JSON from Aladhan" },
-        { status: 502 }
-      );
-    }
+    const json = await response.json();
 
     if (!json?.data || !json.data.timings) {
       console.error("Aladhan returned empty timings:", json);
@@ -47,25 +39,44 @@ export async function POST(req) {
     }
 
     const data = json.data;
-    const timingsFromAladhan = data.timings;
+    const t = data.timings;
+
+    // Bersihkan "05:01 (WIB)" -> "05:01"
+    const clean = (str) => (str?.match(/\d{1,2}:\d{1,2}/)?.[0] || "").trim();
 
     const cleanTimings = {
-      fajr: timingsFromAladhan.Fajr?.trim() || "",
-      dhuhr: timingsFromAladhan.Dhuhr?.trim() || "",
-      asr: timingsFromAladhan.Asr?.trim() || "",
-      maghrib: timingsFromAladhan.Maghrib?.trim() || "",
-      isha: timingsFromAladhan.Isha?.trim() || "",
-      sunrise: timingsFromAladhan.Sunrise?.trim() || "",
+      fajr: clean(t.Fajr),
+      dhuhr: clean(t.Dhuhr),
+      asr: clean(t.Asr),
+      maghrib: clean(t.Maghrib),
+      isha: clean(t.Isha),
+      sunrise: clean(t.Sunrise),
     };
 
-    // Tanggal aladhan: "07-12-2025" → yyyy-mm-dd
+    // Aladhan date = "07-12-2025"
     const [day, month, year] = data.date.gregorian.date.split("-");
     const today = `${year}-${month}-${day}`;
 
-    // Convert ke epoch (pakai UTC)
+    const tz = data.meta.timezone; // e.g. "Asia/Jakarta"
+
+    // Luxon converter
     const convertToEpoch = (timeString) => {
-      const [h, m] = timeString.split(":");
-      return Date.UTC(year, month - 1, day, h, m);
+      if (!timeString) return null;
+
+      const [hour, minute] = timeString.split(":").map(Number);
+
+      const dt = DateTime.fromObject(
+        {
+          year: Number(year),
+          month: Number(month),
+          day: Number(day),
+          hour,
+          minute,
+        },
+        { zone: tz }
+      );
+
+      return dt.isValid ? dt.toMillis() : null;
     };
 
     const timingsEpoch = {
@@ -77,14 +88,14 @@ export async function POST(req) {
       sunrise: convertToEpoch(cleanTimings.sunrise),
     };
 
-    // Upsert ke DB
+    // Upsert DB
     await PrayerTimes.updateOne(
       { date: today, userId },
       {
         $set: {
           userId,
           date: today,
-          timezone: data.meta.timezone,
+          timezone: tz,
           timings: cleanTimings,
           timingsEpoch,
           location: { lat, lon },
@@ -95,7 +106,6 @@ export async function POST(req) {
       { upsert: true }
     );
 
-    // Ambil kembali doc dari DB supaya pasti lengkap
     const doc = await PrayerTimes.findOne({ date: today, userId }).lean();
 
     return NextResponse.json({ ok: true, data: doc });

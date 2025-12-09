@@ -84,11 +84,24 @@ export default function Home() {
 
           {prayers && (
             <div className="mt-4 space-y-1">
-              {Object.entries(prayers).map(([key, value]) => (
-                <p key={key}>
-                  <strong>{key}:</strong> {value}
-                </p>
-              ))}
+              {Object.entries(prayers).map(([key, value]) => {
+                const prayerNames = {
+                  fajr: "Subuh",
+                  sunrise: "Terbit",
+                  dhuhr: "Zuhur",
+                  asr: "Asar",
+                  maghrib: "Maghrib",
+                  isha: "Isya",
+                };
+
+                const label = prayerNames[key] || key;
+
+                return (
+                  <p key={key}>
+                    <strong>{label}:</strong> {value}
+                  </p>
+                );
+              })}
             </div>
           )}
 
