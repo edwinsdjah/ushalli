@@ -6,6 +6,16 @@ import { sendPush } from "@/lib/push";
 
 const SECRET = process.env.PUSH_SERVER_SECRET;
 
+// Mapping nama sholat → Bahasa Indonesia
+const PRAYER_NAME_MAP = {
+  fajr: "Subuh",
+  dhuhr: "Zuhur",
+  asr: "Asar",
+  maghrib: "Maghrib",
+  isha: "Isya",
+  sunrise: "Terbit Matahari",
+};
+
 export async function POST(req) {
   try {
     const body = await req.json().catch(() => ({}));
@@ -19,11 +29,11 @@ export async function POST(req) {
 
     const today = new Date().toLocaleDateString("en-CA");
 
-    // ⏱ Hitung epoch menit ini (dibulatkan ke bawah)
+    // 🎯 Epoch menit ini (dibulatkan ke menit)
     const now = Date.now();
     const currentMinuteEpoch = Math.floor(now / 60000) * 60000;
 
-    // Ambil jadwal sholat hari ini
+    // Ambil semua jadwal hari ini
     const todays = await PrayerTimes.find({ date: today }).lean();
 
     const sendResults = [];
@@ -35,20 +45,23 @@ export async function POST(req) {
       for (const [prayerName, epoch] of Object.entries(timingsEpoch)) {
         if (!epoch) continue;
 
-        // ❌ jangan kirim ulang jika sudah dikirim hari ini
+        // ❌ Sudah dikirim hari ini → skip
         if (sentFlags[prayerName]) continue;
 
-        // ⏱ kirim hanya jika OR tepat pada menitnya
+        // 🕒 Kirim TEPAT pada menitnya
         if (epoch === currentMinuteEpoch) {
+          const localName = PRAYER_NAME_MAP[prayerName] || prayerName;
+
           const payloadObj = {
-            title: `Waktu Sholat ${capitalize(prayerName)}`,
-            body: `Sudah masuk waktu ${capitalize(prayerName)}.`,
+            title: `Waktu Sholat ${localName}`,
+            body: `Sudah masuk waktu ${localName}.`,
             url: "/",
             tag: `prayer-${prayerName}-${pt.date}`,
             prayer: prayerName,
             date: pt.date,
           };
 
+          // Ambil subscription user
           let subs = [];
           if (pt.userId) {
             subs = await Subscription.find({ userId: pt.userId }).lean();
@@ -56,6 +69,7 @@ export async function POST(req) {
             subs = await Subscription.find({}).lean();
           }
 
+          // Kirim push ke semua device user
           const pushResults = await Promise.all(
             subs.map(async (s) => {
               try {
@@ -64,6 +78,7 @@ export async function POST(req) {
                   JSON.stringify(payloadObj)
                 );
 
+                // Hapus subscription invalid
                 if (
                   !r.ok &&
                   (r.error?.statusCode === 410 || r.error?.statusCode === 404)
@@ -84,7 +99,7 @@ export async function POST(req) {
 
           sendResults.push(...pushResults);
 
-          // tandai sudah kirim — agar tidak ulang
+          // ✔ Tandai sudah dikirim agar tidak kirim ulang
           await PrayerTimes.updateOne(
             { _id: pt._id },
             { $set: { [`notificationsSent.${prayerName}`]: true } }
@@ -98,8 +113,4 @@ export async function POST(req) {
     console.error("cron send error:", err);
     return NextResponse.json({ error: "Server error" }, { status: 500 });
   }
-}
-
-function capitalize(s = "") {
-  return s.charAt(0).toUpperCase() + s.slice(1);
 }
