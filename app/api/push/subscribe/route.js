@@ -2,17 +2,6 @@ import { NextResponse } from "next/server";
 import connect from "@/lib/mongoose";
 import Subscription from "@/models/Subscription";
 
-function getOrCreateUserId() {
-  if (typeof window === "undefined") return null;
-
-  let uid = localStorage.getItem("ushalli_user_id");
-  if (!uid) {
-    uid = crypto.randomUUID();
-    localStorage.setItem("ushalli_user_id", uid);
-  }
-  return uid;
-}
-
 export async function POST(req) {
   try {
     const body = await req.json();
