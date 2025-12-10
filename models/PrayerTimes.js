@@ -24,7 +24,6 @@ const PrayerTimesSchedule = new mongoose.Schema(
       asr: Number,
       maghrib: Number,
       isha: Number,
-      sunrise: Number,
     },
     notificationsSent: {
       fajr: { type: Boolean, default: false },
