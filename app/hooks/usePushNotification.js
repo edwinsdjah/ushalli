@@ -77,13 +77,28 @@ export default function usePushNotification() {
 
       const userId = getOrCreateUserId();
 
+      // setelah sukses simpan subscription ke server
       await fetch("/api/push/subscribe", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ ...subscription.toJSON(), userId }),
       });
 
+      // 🔥 Ambil lokasi user dari localStorage
+      const savedCoords = localStorage.getItem("user_coords");
+      if (savedCoords) {
+        const { lat, lon } = JSON.parse(savedCoords);
+
+        // 🔥 Regenerate PrayerTimes setelah subscribe
+        await fetch("/api/prayer-times", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ lat, lon, userId }),
+        });
+      }
+
       setIsSubscribed(true);
+
       return { ok: true };
     } catch (err) {
       return { ok: false, error: err.message };
