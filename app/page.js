@@ -9,6 +9,7 @@ import useUserLocation from "./hooks/useUserLocation";
 import { getOrCreateUserId } from "@/helpers/user";
 import { useLocationContext } from "@/app/context/locationContext";
 import Link from "next/link";
+import PrayerCards from "./Components/PrayerCards";
 
 export default function Home() {
   // PUSH NOTIFICATION HOOK
@@ -19,7 +20,7 @@ export default function Home() {
     loading: pushLoading,
   } = usePushNotification();
 
-  const userId = getOrCreateUserId(); // <-- aman
+  const userId = getOrCreateUserId();
 
   // LOCATION HOOK
   const {
@@ -31,36 +32,40 @@ export default function Home() {
   } = useUserLocation();
 
   // LOCATION CONTEXT
-  const { coords: ctxCoords, setCoords } = useLocationContext();
+  const {
+    coords: ctxCoords,
+    setCoords,
+    getLocationName,
+  } = useLocationContext();
 
   const [prayers, setPrayers] = useState(null);
-
-  // ⬅️ DEBUG: apakah context berubah?
+  const [locationName, setLocationName] = useState(null);
+  /**
+   * 🔥 FIXED:
+   * Hanya 1 effect yang men-set context dari coords hook.
+   * Tidak ada duplikasi lagi.
+   * Dependency hanya coords agar tidak loop.
+   */
   useEffect(() => {
-    console.log("Context coords →", ctxCoords);
-  }, [ctxCoords]);
+    if (!coords) return;
 
-  // 🔥 UPDATE CONTEXT SAAT HOOK MENGHASILKAN KOORDINAT
-  useEffect(() => {
-    if (!coords) {
-      console.log("Home → coords dari hook masih null");
-      return;
-    }
-
-    // Cegah setCoords berulang jika datanya sama
+    // hanya update context jika beda
     if (
       !ctxCoords ||
       ctxCoords.lat !== coords.lat ||
       ctxCoords.lon !== coords.lon
     ) {
-      console.log("Home → MENYIMPAN KE CONTEXT:", coords);
       setCoords(coords);
+      setLocationName(getLocationName(coords.lat, coords.lon));
     }
-  }, [coords, ctxCoords, setCoords]);
+  }, [coords]); // <— intentionally ONLY coords
 
-  // FETCH JADWAL SHOLAT
+  /**
+   * 🔥 Ambil jadwal sholat ketika coords sudah masuk context.
+   * Ini memastikan fetch hanya jalan sekali per perubahan lokasi.
+   */
   useEffect(() => {
-    if (!coords || !userId) return;
+    if (!ctxCoords || !userId) return;
 
     (async () => {
       try {
@@ -68,14 +73,13 @@ export default function Home() {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({
-            lat: coords.lat,
-            lon: coords.lon,
+            lat: ctxCoords.lat,
+            lon: ctxCoords.lon,
             userId,
           }),
         });
 
         const json = await res.json();
-        console.log("API PRAYERS:", json.data);
 
         if (json?.data?.timings) {
           setPrayers(json.data.timings);
@@ -84,17 +88,7 @@ export default function Home() {
         console.error("Failed fetching prayer times", err);
       }
     })();
-  }, [coords]);
-
-  useEffect(() => {
-    console.log("HOOK coords:", coords);
-    console.log("CONTEXT BEFORE:", ctxCoords);
-
-    if (coords) {
-      console.log("SETTING CTX:", coords);
-      setCoords(coords);
-    }
-  }, [coords]);
+  }, [ctxCoords, userId]);
 
   return (
     <>
@@ -120,26 +114,7 @@ export default function Home() {
           {(locLoading || pushLoading) && <p>Loading...</p>}
 
           {prayers && (
-            <div className="mt-4 space-y-1">
-              {Object.entries(prayers).map(([key, value]) => {
-                const prayerNames = {
-                  fajr: "Subuh",
-                  sunrise: "Terbit",
-                  dhuhr: "Zuhur",
-                  asr: "Asar",
-                  maghrib: "Maghrib",
-                  isha: "Isya",
-                };
-
-                const label = prayerNames[key] || key;
-
-                return (
-                  <p key={key}>
-                    <strong>{label}:</strong> {value}
-                  </p>
-                );
-              })}
-            </div>
+            <PrayerCards prayers={prayers} locationName={locationName} />
           )}
 
           {/* 🔔 Toggle hanya untuk UI setelah user memberi izin */}

@@ -19,7 +19,6 @@ export async function POST(req) {
     // Fetch dari Aladhan
     const api = `https://api.aladhan.com/v1/timings?latitude=${lat}&longitude=${lon}&method=2`;
     const response = await fetch(api);
-
     if (!response.ok) {
       console.error("Aladhan error:", response.status);
       return NextResponse.json(
@@ -29,7 +28,6 @@ export async function POST(req) {
     }
 
     const json = await response.json();
-
     if (!json?.data || !json.data.timings) {
       console.error("Aladhan returned empty timings:", json);
       return NextResponse.json(

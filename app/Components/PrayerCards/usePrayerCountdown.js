@@ -1,0 +1,42 @@
+"use client";
+
+import { useEffect, useState } from "react";
+import { getNextPrayer, getCurrentPrayer } from "./helpers";
+
+export default function usePrayerCountdown(prayers) {
+  const [countdown, setCountdown] = useState("");
+  const [nextPrayer, setNextPrayer] = useState("");
+  const [currentPrayer, setCurrentPrayer] = useState("");
+
+  useEffect(() => {
+    if (!prayers) return;
+
+    const tick = () => {
+      const next = getNextPrayer(prayers);
+      const current = getCurrentPrayer(prayers);
+
+      const now = new Date();
+      const diff = next.time - now;
+
+      if (diff <= 0) {
+        setCurrentPrayer(current);
+        setNextPrayer(next.name);
+        return;
+      }
+
+      const h = String(Math.floor(diff / 3600000)).padStart(2, "0");
+      const m = String(Math.floor((diff % 3600000) / 60000)).padStart(2, "0");
+      const s = String(Math.floor((diff % 60000) / 1000)).padStart(2, "0");
+
+      setCountdown(`${h}:${m}:${s}`);
+      setNextPrayer(next.name);
+      setCurrentPrayer(current);
+    };
+
+    tick();
+    const interval = setInterval(tick, 1000);
+    return () => clearInterval(interval);
+  }, [prayers]);
+
+  return { countdown, nextPrayer, currentPrayer };
+}
