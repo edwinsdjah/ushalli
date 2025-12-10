@@ -49,13 +49,13 @@ export async function regeneratePrayerTimesForUser(user) {
   );
 
   await PrayerTimes.updateOne(
-    { userId, date: `${year}-${month}-${day}` },
+    { userId }, // <── hanya cari berdasarkan userId
     {
       $set: {
         userId,
         timezone: tz,
         location: { lat, lon },
-        date: `${year}-${month}-${day}`,
+        date: `${year}-${month}-${day}`, // <── date selalu di-update
         timings: cleanTimings,
         timingsEpoch,
         updatedAt: new Date(),
