@@ -35,7 +35,7 @@ export default function PrayerCards({ prayers, locationName }) {
         </div>
       </div>
 
-      <div className="flex gap-4 justify-center overflow-x-auto py-4">
+      <div className="flex gap-4 md:justify-center sm:justify-start overflow-x-auto py-4">
         {Object.entries(prayers)
           .filter(([key]) =>
             ["fajr", "dhuhr", "asr", "maghrib", "isha"].includes(key)
