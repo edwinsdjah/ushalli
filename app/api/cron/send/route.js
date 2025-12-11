@@ -3,10 +3,10 @@ import connect from "@/lib/mongoose";
 import Subscription from "@/models/Subscription";
 import PrayerTimes from "@/models/PrayerTimes";
 import { sendPush } from "@/lib/push";
+import { DateTime } from "luxon";
 
 const SECRET = process.env.PUSH_SERVER_SECRET;
 
-// Mapping nama sholat → Bahasa Indonesia
 const PRAYER_NAME_MAP = {
   fajr: "Subuh",
   dhuhr: "Zuhur",
@@ -27,29 +27,37 @@ export async function POST(req) {
 
     await connect();
 
-    const today = new Date().toLocaleDateString("en-CA");
-
-    // 🎯 Epoch menit ini (dibulatkan ke menit)
-    const now = Date.now();
-    const currentMinuteEpoch = Math.floor(now / 60000) * 60000;
-
-    // Ambil semua jadwal hari ini
-    const todays = await PrayerTimes.find({ date: today }).lean();
+    // 🔥 Ambil semua jadwal hari ini (server-day)
+    // Kita akan cek lagi pakai tz user agar tidak salah hari
+    const allDocs = await PrayerTimes.find({}).lean();
 
     const sendResults = [];
 
-    for (const pt of todays) {
+    for (const pt of allDocs) {
+      const tz = pt.timezone || "UTC";
+
+      // 📅 Hitung tanggal lokal user
+      const nowUser = DateTime.now().setZone(tz);
+
+      const todayUser = nowUser.toFormat("yyyy-MM-dd");
+
+      // Tidak cocok dengan tanggal sholat user → skip
+      if (pt.date !== todayUser) continue;
+
+      // 🎯 Epoch menit ini (versi user timezone)
+      const currentMinuteEpoch = nowUser.startOf("minute").toMillis();
+
       const timingsEpoch = pt.timingsEpoch || {};
       const sentFlags = pt.notificationsSent || {};
 
       for (const [prayerName, epoch] of Object.entries(timingsEpoch)) {
         if (!epoch) continue;
 
-        // ❌ Sudah dikirim hari ini → skip
+        // ❌ Sudah dikirim → skip
         if (sentFlags[prayerName]) continue;
 
-        // 🕒 Kirim TEPAT pada menitnya
-        if (epoch === currentMinuteEpoch) {
+        // 🕒 Kirim jika masuk dalam 1 menit interval
+        if (epoch >= currentMinuteEpoch && epoch < currentMinuteEpoch + 60000) {
           const localName = PRAYER_NAME_MAP[prayerName] || prayerName;
 
           const payloadObj = {
@@ -61,15 +69,12 @@ export async function POST(req) {
             date: pt.date,
           };
 
-          // Ambil subscription user
-          let subs = [];
-          if (pt.userId) {
-            subs = await Subscription.find({ userId: pt.userId }).lean();
-          } else {
-            subs = await Subscription.find({}).lean();
-          }
+          // Ambil subscription sesuai user
+          const subs = pt.userId
+            ? await Subscription.find({ userId: pt.userId }).lean()
+            : await Subscription.find({}).lean();
 
-          // Kirim push ke semua device user
+          // Kirim push
           const pushResults = await Promise.all(
             subs.map(async (s) => {
               try {
@@ -99,7 +104,7 @@ export async function POST(req) {
 
           sendResults.push(...pushResults);
 
-          // ✔ Tandai sudah dikirim agar tidak kirim ulang
+          // ✔ Tandai sudah dikirim
           await PrayerTimes.updateOne(
             { _id: pt._id },
             { $set: { [`notificationsSent.${prayerName}`]: true } }
