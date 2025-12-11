@@ -112,3 +112,22 @@ export async function POST(req) {
     return NextResponse.json({ error: "Server error" }, { status: 500 });
   }
 }
+
+export async function GET(req) {
+  try {
+    await connect();
+
+    const userId = req.nextUrl.searchParams.get("userId");
+    if (!userId) {
+      return NextResponse.json({ error: "userId required" }, { status: 400 });
+    }
+
+    const today = DateTime.local().toFormat("yyyy-MM-dd");
+
+    const doc = await PrayerTimes.findOne({ date: today, userId }).lean();
+
+    return NextResponse.json({ ok: true, data: doc || null });
+  } catch (err) {
+    return NextResponse.json({ error: "Server error" }, { status: 500 });
+  }
+}
