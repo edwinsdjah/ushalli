@@ -22,6 +22,7 @@ export default function MosqueMapClient({
       center={[-6.2, 106.8]}
       zoom={13}
       className='h-full w-full'
+      zoomControl={false}
       dragging={!isRouting}
       scrollWheelZoom={!isRouting}
       doubleClickZoom={!isRouting}

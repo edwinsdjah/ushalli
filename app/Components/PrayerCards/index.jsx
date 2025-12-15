@@ -41,7 +41,7 @@ export default function PrayerCards({ prayers, locationName }) {
               year: 'numeric',
             })}
           </p>
-          <p className='text-xs text-gray-500 mt-1'>Lokasi · {locationName}</p>
+          <p className='text-xs text-gray-500 mt-1'>Lokasi  {locationName}</p>
         </div>
       </div>
 
