@@ -1,6 +1,6 @@
-"use client";
+'use client';
 
-import usePushNotification from "@/app/hooks/usePushNotification";
+import usePushNotification from '@/app/hooks/usePushNotification';
 
 export default function NotificationToggle() {
   const {
@@ -12,15 +12,19 @@ export default function NotificationToggle() {
     loading,
   } = usePushNotification();
 
-  // Jika browser tidak support
+  // Browser tidak support
   if (!isSupported) {
-    return <p>Browser kamu tidak mendukung push notification.</p>;
+    return (
+      <p className='text-sm text-red-500'>
+        Browser kamu tidak mendukung push notification.
+      </p>
+    );
   }
 
-  // Jika user belum memberikan permission sama sekali
-  if (permission === "denied") {
+  // User menolak permission
+  if (permission === 'denied') {
     return (
-      <p className="text-red-500">
+      <p className='text-sm text-red-500'>
         Kamu menolak notifikasi. Aktifkan kembali dari pengaturan browser.
       </p>
     );
@@ -28,25 +32,33 @@ export default function NotificationToggle() {
 
   const handleToggle = async () => {
     if (loading) return;
-
-    if (isSubscribed) {
-      await unsubscribeFromPush();
-    } else {
-      await subscribeToPush();
-    }
+    if (isSubscribed) await unsubscribeFromPush();
+    else await subscribeToPush();
   };
+
+  let bgClass = 'bg-[var(--color-royal)] hover:bg-purple-700';
+  let textClass = 'text-white';
+
+  if (loading) {
+    bgClass = 'bg-gray-500 cursor-not-allowed';
+  } else if (isSubscribed) {
+    bgClass = 'bg-yellow-500 hover:bg-yellow-600';
+  }
 
   return (
     <button
       disabled={loading}
       onClick={handleToggle}
-      className="px-4 py-2 rounded bg-blue-600 text-white"
+      className={`px-5 py-3 rounded-2xl font-semibold shadow-md transition-all transform
+        ${bgClass} ${textClass} ${
+        !loading && 'hover:scale-105 active:scale-95'
+      }`}
     >
       {loading
-        ? "Processing..."
+        ? 'Processing...'
         : isSubscribed
-        ? "Matikan Pengingat Waktu Sholat"
-        : "Aktifkan Pengingat Waktu Sholat"}
+        ? 'Matikan Pengingat Waktu Sholat'
+        : 'Aktifkan Pengingat Waktu Sholat'}
     </button>
   );
 }
