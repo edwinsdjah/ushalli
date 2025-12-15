@@ -1,16 +1,17 @@
-"use client";
+'use client';
 
-import { useEffect, useState } from "react";
-import NotificationToggle from "@/app/Components/NotificationToggle";
-import NotificationModal from "./Components/NotificationModal";
-import LocationModal from "./Components/LocationModal";
-import usePushNotification from "./hooks/usePushNotification";
-import useUserLocation from "./hooks/useUserLocation";
-import { getOrCreateUserId } from "@/helpers/user";
-import { useLocationContext } from "@/app/context/locationContext";
-import Link from "next/link";
-import PrayerCards from "./Components/PrayerCards";
-import UpdateLocationButton from "./Components/UpdateLocationButton";
+import { useEffect, useState } from 'react';
+import NotificationToggle from '@/app/Components/NotificationToggle';
+import NotificationModal from './Components/NotificationModal';
+import LocationModal from './Components/LocationModal';
+import usePushNotification from './hooks/usePushNotification';
+import useUserLocation from './hooks/useUserLocation';
+import { getOrCreateUserId } from '@/helpers/user';
+import { useLocationContext } from '@/app/context/locationContext';
+import Link from 'next/link';
+import PrayerCards from './Components/PrayerCards';
+import UpdateLocationButton from './Components/UpdateLocationButton';
+import MainNavigation from './Components/MainNavigation';
 
 export default function Home() {
   // PUSH NOTIFICATION HOOK
@@ -20,8 +21,6 @@ export default function Home() {
     isSubscribed,
     loading: pushLoading,
   } = usePushNotification();
-
-  const userId = getOrCreateUserId();
 
   // LOCATION HOOK
   const {
@@ -39,6 +38,7 @@ export default function Home() {
     getLocationName,
   } = useLocationContext();
 
+  const userId = getOrCreateUserId();
   const [prayers, setPrayers] = useState(null);
   const [locationName, setLocationName] = useState(null);
   const [btnLoading, setBtnLoading] = useState(false);
@@ -73,9 +73,9 @@ export default function Home() {
 
     (async () => {
       try {
-        const res = await fetch("/api/prayer-times", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
+        const res = await fetch('/api/prayer-times', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
             lat: ctxCoords.lat,
             lon: ctxCoords.lon,
@@ -89,7 +89,7 @@ export default function Home() {
           setPrayers(json.data.timings);
         }
       } catch (err) {
-        console.error("Failed fetching prayer times", err);
+        console.error('Failed fetching prayer times', err);
       }
     })();
   }, [ctxCoords, userId]);
@@ -110,9 +110,9 @@ export default function Home() {
       !dbCoords || dbCoords.lat !== coords.lat || dbCoords.lon !== coords.lon;
 
     if (isDifferent) {
-      await fetch("/api/prayer-times", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
+      await fetch('/api/prayer-times', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           lat: coords.lat,
           lon: coords.lon,
@@ -120,10 +120,10 @@ export default function Home() {
         }),
       });
       setBtnLoading(false);
-      setLocationStatus("different");
+      setLocationStatus('different');
     } else {
       setBtnLoading(false);
-      setLocationStatus("same");
+      setLocationStatus('same');
     }
   };
 
@@ -140,14 +140,6 @@ export default function Home() {
 
   return (
     <>
-      {/* 🔔 Modal pertama kali untuk push notification */}
-      <NotificationModal
-        open={permission === "default"}
-        onAllow={subscribeToPush}
-        onIgnore={() => Notification.requestPermission()}
-        loading={pushLoading}
-      />
-
       {/* 📍 Modal izin lokasi pertama kali */}
       <LocationModal
         open={modalOpen}
@@ -155,10 +147,10 @@ export default function Home() {
         onIgnore={ignoreLocation}
       />
 
-      <div className="flex min-h-screen items-center justify-center bg-zinc-50 font-sans dark:bg-black">
-        <main className="flex min-h-screen w-full max-w-3xl flex-col items-center justify-between py-32 px-4 bg-white dark:bg-black sm:items-start">
-          <h1 className="text-2xl font-bold">Jadwal Sholat</h1>
-          {/* {(locLoading || pushLoading) && <p>Loading...</p>} */}
+      <div className='flex min-h-screen items-center justify-center bg-zinc-50 font-sans dark:bg-black'>
+        <main className='flex min-h-screen w-full max-w-3xl flex-col items-center justify-between py-32 px-4 bg-white dark:bg-black sm:items-start'>
+          <h1 className='text-2xl font-bold'>Jadwal Sholat</h1>
+
           {prayers && (
             <PrayerCards prayers={prayers} locationName={locationName} />
           )}
@@ -170,7 +162,7 @@ export default function Home() {
             loading={btnLoading}
             locationStatus={locationStatus}
           />
-          <Link href={"/compass"}>Klik</Link>
+          <MainNavigation />
         </main>
       </div>
     </>
