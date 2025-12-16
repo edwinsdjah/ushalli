@@ -1,127 +1,129 @@
-'use client';
+"use client";
 
-import { useEffect, useState } from 'react';
-import NotificationToggle from '@/app/Components/NotificationToggle';
-import NotificationModal from './Components/NotificationModal';
-import LocationModal from './Components/LocationModal';
-import usePushNotification from './hooks/usePushNotification';
-import useUserLocation from './hooks/useUserLocation';
-import { getOrCreateUserId } from '@/helpers/user';
-import { useLocationContext } from '@/app/context/locationContext';
-import PrayerCards from './Components/PrayerCards';
-import UpdateLocationButton from './Components/UpdateLocationButton';
-import MainNavigation from './Components/MainNavigation';
+import { useEffect, useState } from "react";
+import NotificationToggle from "@/app/Components/NotificationToggle";
+import LocationModal from "./Components/LocationModal";
+import usePushNotification from "./hooks/usePushNotification";
+import useUserLocation from "./hooks/useUserLocation";
+import { getOrCreateUserId } from "@/helpers/user";
+import { useLocationContext } from "@/app/context/locationContext";
+import PrayerCards from "./Components/PrayerCards";
+import UpdateLocationButton from "./Components/UpdateLocationButton";
+import MainNavigation from "./Components/MainNavigation";
 
 export default function Home() {
-  // PUSH NOTIFICATION HOOK
-  const { permission, subscribeToPush, isSubscribed } = usePushNotification();
+  // PUSH NOTIFICATION
+  const { isSubscribed } = usePushNotification();
 
-  // LOCATION HOOK
+  // USER LOCATION (browser)
   const { coords, modalOpen, requestLocation, ignoreLocation } =
     useUserLocation();
 
-  // LOCATION CONTEXT
+  // LOCATION + PRAYER CONTEXT
   const {
     coords: ctxCoords,
     setCoords,
     getLocationName,
+    locationName,
+    prayers,
+    lastPrayerCoords,
+    setPrayerData,
   } = useLocationContext();
 
   const userId = getOrCreateUserId();
-  const [prayers, setPrayers] = useState(null);
-  const [locationName, setLocationName] = useState(null);
+
   const [btnLoading, setBtnLoading] = useState(false);
   const [locationStatus, setLocationStatus] = useState(null);
 
-  // Update context
+  /* =========================
+     UPDATE CONTEXT COORDS
+  ========================== */
   useEffect(() => {
     if (!coords) return;
+
     if (
       !ctxCoords ||
       ctxCoords.lat !== coords.lat ||
       ctxCoords.lon !== coords.lon
     ) {
       setCoords(coords);
-      setLocationName(getLocationName(coords.lat, coords.lon));
+      getLocationName(coords.lat, coords.lon); // async, set di context
     }
   }, [coords]);
 
-  // Fetch prayer times
+  /* =========================
+     FETCH PRAYER TIMES (CACHED)
+  ========================== */
   useEffect(() => {
     if (!ctxCoords || !userId) return;
+
+    // ⛔️ Skip fetch jika masih valid
+    if (
+      prayers &&
+      lastPrayerCoords &&
+      lastPrayerCoords.lat === ctxCoords.lat &&
+      lastPrayerCoords.lon === ctxCoords.lon
+    ) {
+      return;
+    }
+
     (async () => {
       try {
-        const res = await fetch('/api/prayer-times', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
+        const res = await fetch("/api/prayer-times", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
           body: JSON.stringify({
             lat: ctxCoords.lat,
             lon: ctxCoords.lon,
             userId,
           }),
         });
+
         const json = await res.json();
-        if (json?.data?.timings) setPrayers(json.data.timings);
+
+        if (json?.data?.timings) {
+          setPrayerData(json.data.timings, ctxCoords);
+        }
       } catch (err) {
-        console.error('Failed fetching prayer times', err);
+        console.error("Failed fetching prayer times", err);
       }
     })();
   }, [ctxCoords, userId]);
 
+  /* =========================
+     UPDATE LOCATION BUTTON
+  ========================== */
   const handleUpdateLocation = async () => {
     setBtnLoading(true);
-    await requestLocation();
-    if (!coords) return;
-
-    const res = await fetch(`/api/prayer-times?userId=${userId}`);
-    const json = await res.json();
-    const dbCoords = json?.data?.location;
-
-    const isDifferent =
-      !dbCoords || dbCoords.lat !== coords.lat || dbCoords.lon !== coords.lon;
-
-    if (isDifferent) {
-      await fetch('/api/prayer-times', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ lat: coords.lat, lon: coords.lon, userId }),
-      });
-      setLocationStatus('different');
-    } else {
-      setLocationStatus('same');
-    }
+    await requestLocation(); // biarkan effect yang bekerja
     setBtnLoading(false);
   };
 
+  /* =========================
+     AUTO CLEAR STATUS
+  ========================== */
   useEffect(() => {
     if (!locationStatus) return;
-    const timeout = setTimeout(() => setLocationStatus(null), 3000);
-    return () => clearTimeout(timeout);
+    const t = setTimeout(() => setLocationStatus(null), 3000);
+    return () => clearTimeout(t);
   }, [locationStatus]);
 
   return (
     <>
-      {/* Modals */}
+      {/* Location Modal */}
       <LocationModal
         open={modalOpen}
         onAllow={requestLocation}
         onIgnore={ignoreLocation}
       />
 
-      <div className='flex min-h-screen flex-col bg-zinc-50 dark:bg-black font-sans'>
-        <main className='flex flex-col w-full max-w-3xl mx-auto px-4 pt-16 pb-32 gap-6'>
-          {/* Header */}
-          <h1 className='text-3xl font-bold text-gray-900 dark:text-white text-center sm:text-left'>
+      <div className="flex min-h-screen flex-col bg-zinc-50 dark:bg-black font-sans">
+        <main className="flex flex-col w-full max-w-3xl mx-auto px-4 pt-16 pb-32 gap-6">
+          <h1 className="text-3xl font-bold text-gray-900 dark:text-white">
             Jadwal Sholat
           </h1>
-
-          {/* Prayer Cards */}
-          {prayers && (
-            <PrayerCards prayers={prayers} locationName={locationName} />
-          )}
-
-          {/* Action Buttons */}
-          <div className='flex flex-col sm:flex-row items-center gap-3 mt-4'>
+          <PrayerCards prayers={prayers} locationName={locationName} />
+          <div className="flex flex-col sm:flex-row sm:justify-items-normal items-center gap-3 mt-4">
             <UpdateLocationButton
               onUpdate={handleUpdateLocation}
               loading={btnLoading}
@@ -131,7 +133,6 @@ export default function Home() {
           </div>
         </main>
 
-        {/* Bottom Navigation */}
         <MainNavigation />
       </div>
     </>
