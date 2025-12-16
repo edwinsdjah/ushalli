@@ -1,8 +1,8 @@
 'use client';
 
 import React, { useEffect, useState } from 'react';
-import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
-import { Loader2 } from 'lucide-react';
+import { Card, CardContent } from '@/components/ui/card';
+import { Loader2, Compass } from 'lucide-react';
 import { useLocationContext } from '@/app/context/locationContext';
 import MainNavigation from '../Components/MainNavigation';
 
@@ -17,15 +17,11 @@ function calculateQiblaDirection(lat, lon) {
   const λ2 = (kaabaLon * Math.PI) / 180;
 
   const Δλ = λ2 - λ1;
-
   const y = Math.sin(Δλ) * Math.cos(φ2);
   const x =
     Math.cos(φ1) * Math.sin(φ2) - Math.sin(φ1) * Math.cos(φ2) * Math.cos(Δλ);
 
-  // hasil radian → degrees
   let bearing = (Math.atan2(y, x) * 180) / Math.PI;
-
-  // normalisasi 0–360
   return (bearing + 360) % 360;
 }
 
@@ -47,18 +43,15 @@ export default function CompassPage() {
     setLoading(false);
   }, [coords]);
 
-  // REAL-TIME SENSOR
   useEffect(() => {
     if (!permissionGranted) return;
 
     const handler = e => {
       let d = null;
 
-      // iPhone
       if (typeof e.webkitCompassHeading === 'number') {
-        d = e.webkitCompassHeading; // langsung benar
+        d = e.webkitCompassHeading;
       } else if (typeof e.alpha === 'number') {
-        // Android: alpha 0 = selatan, jadi perlu dikoreksi
         d = 360 - e.alpha;
       }
 
@@ -71,14 +64,12 @@ export default function CompassPage() {
     return () => window.removeEventListener('deviceorientation', handler);
   }, [permissionGranted]);
 
-  // Button untuk aktifkan sensor
   const requestPermission = async () => {
     try {
       if (DeviceOrientationEvent?.requestPermission) {
         const res = await DeviceOrientationEvent.requestPermission();
         if (res === 'granted') setPermissionGranted(true);
       } else {
-        // Android Chrome tanpa need permission
         setPermissionGranted(true);
       }
     } catch (e) {
@@ -89,70 +80,69 @@ export default function CompassPage() {
   const angleToQibla = qibla !== null ? (qibla - heading + 360) % 360 : 0;
 
   return (
-    <div className='min-h-screen flex items-center justify-center p-6 bg-gray-200'>
-      <Card className='w-full max-w-sm shadow-xl rounded-2xl border-none bg-gray-100'>
-        <CardHeader>
-          <CardTitle className='text-center text-xl font-bold'>
-            Kompas Kiblat Real-Time
-          </CardTitle>
-        </CardHeader>
+    <div className='min-h-screen flex flex-col items-center justify-center bg-gray-50 p-6 font-sans'>
+      {/* Instruksi */}
+      <p className='mb-4 text-gray-500 text-center text-sm md:text-base tracking-wide'>
+        Silakan Tempatkan Perangkat Anda dalam posisi mendatar
+      </p>
 
+      <Card className='w-full max-w-md rounded-3xl border-none bg-white shadow-xl'>
         <CardContent className='flex flex-col items-center gap-6'>
-          {!permissionGranted && (
-            <button
-              onClick={requestPermission}
-              className='px-4 py-2 bg-black text-white rounded-lg'
-            >
-              Aktifkan Sensor Kompas
-            </button>
-          )}
-
           {loading ? (
-            <Loader2 className='animate-spin' />
+            <Loader2 className='animate-spin text-purple-600' />
           ) : !coords ? (
-            <p className='text-center text-sm'>Lokasi belum tersedia.</p>
+            <p className='text-center text-sm text-gray-600'>Lokasi belum tersedia.</p>
           ) : (
             <>
+              {/* Kompas */}
               <div className='relative w-72 h-72 flex items-center justify-center'>
-                {/* Kompas 3D Background */}
-                <div
-                  className='
-                    absolute inset-0 rounded-full
-                    bg-gray-100
-                    shadow-[inset_8px_8px_16px_#c8c8c8,inset_-8px_-8px_16px_white]
-                  '
-                />
-
-                {/* Jarum Utara (biru) */}
-                <div
-                  className='absolute w-52 h-52 flex items-center justify-center transition-transform duration-150'
-                  style={{ transform: `rotate(${heading}deg)` }}
-                >
-                  <div className='w-1.5 h-24 bg-blue-500 rounded-full shadow-lg' />
+                {/* Lingkaran kompas abu-abu modern */}
+                <div className='absolute inset-0 rounded-full bg-gray-100 border-gray-300 flex items-center justify-center'>
+                  {/* Arah N, E, S, W */}
+                  <span className='absolute top-2 text-gray-500 font-medium'>N</span>
+                  <span className='absolute right-2 text-gray-500 font-medium'>E</span>
+                  <span className='absolute bottom-2 text-gray-500 font-medium'>S</span>
+                  <span className='absolute left-2 text-gray-500 font-medium'>W</span>
                 </div>
 
-                {/* Jarum Kiblat (merah) + Ka'bah */}
+                {/* Jarum Kiblat modern */}
                 <div
-                  className='absolute w-52 h-52 flex items-center justify-center transition-transform duration-150'
+                  className='absolute w-64 h-64 flex items-center justify-center transition-transform duration-200 ease-in-out'
                   style={{ transform: `rotate(${angleToQibla}deg)` }}
                 >
-                  <div className='relative flex flex-col items-center'>
-                    <div className='w-2 h-28 bg-red-500 rounded-full shadow-xl' />
-
-                    <div
-                      className='
-                        absolute -bottom-6 w-8 h-8 bg-black rounded-lg
-                        flex items-center justify-center border border-yellow-500
-                      '
-                    >
+                  <div className='relative flex flex-col items-center justify-start'>
+                    {/* Panah jarum */}
+                    <div className='w-1 h-36 bg-[var(--color-royal)] rounded shadow-lg relative'>
+                      <div className='absolute -top-3 left-1/2 transform -translate-x-1/2 w-0 h-0 border-l-6 border-r-6 border-b-10 border-b-purple-800  border-l-transparent border-r-transparent' />
+                    </div>
+                    {/* Ka'bah di ujung jarum */}
+                    <div className='absolute -top-12 w-10 h-10 flex items-center justify-center rounded-full text-white font-bold text-lg'>
                       🕋
                     </div>
                   </div>
                 </div>
               </div>
+
+              {/* Lokasi */}
+              <div className='mt-6 text-center text-gray-700 font-medium'>
+                <p>Latitude: {coords.lat.toFixed(4)}</p>
+                <p>Longitude: {coords.lon.toFixed(4)}</p>
+              </div>
+
+              {/* Tombol Aktifkan Sensor */}
+              {!permissionGranted && (
+                <button
+                  onClick={requestPermission}
+                  className='mt-4 flex items-center gap-2 px-4 py-2 bg-[var(--color-royal)] hover:bg-purple-800 text-white rounded-xl transition-all font-medium'
+                >
+                  <Compass size={20} />
+                  Aktifkan Sensor
+                </button>
+              )}
             </>
           )}
         </CardContent>
+
         <MainNavigation />
       </Card>
     </div>

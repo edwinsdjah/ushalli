@@ -123,7 +123,7 @@ export default function Home() {
             Jadwal Sholat
           </h1>
           <PrayerCards prayers={prayers} locationName={locationName} />
-          <div className="flex flex-col sm:flex-row items-center gap-3 mt-4">
+          <div className="flex flex-col sm:flex-row sm:justify-items-normal items-center gap-3 mt-4">
             <UpdateLocationButton
               onUpdate={handleUpdateLocation}
               loading={btnLoading}
