@@ -1,28 +1,24 @@
-"use client";
+'use client';
 
-import { useEffect, useState } from "react";
-import NotificationToggle from "@/app/Components/NotificationToggle";
-import LocationModal from "./Components/LocationModal";
-import usePushNotification from "./hooks/usePushNotification";
-import useUserLocation from "./hooks/useUserLocation";
-import { getOrCreateUserId } from "@/helpers/user";
-import { useLocationContext } from "@/app/context/locationContext";
-import PrayerCards from "./Components/PrayerCards";
-import UpdateLocationButton from "./Components/UpdateLocationButton";
-import MainNavigation from "./Components/MainNavigation";
+import { useEffect, useState } from 'react';
+import NotificationToggle from '@/app/Components/NotificationToggle';
+import LocationModal from './Components/LocationModal';
+import usePushNotification from './hooks/usePushNotification';
+import useUserLocation from './hooks/useUserLocation';
+import { getOrCreateUserId } from '@/helpers/user';
+import { useLocationContext } from '@/app/context/locationContext';
+import PrayerCards from './Components/PrayerCards';
+import UpdateLocationButton from './Components/UpdateLocationButton';
+import MainNavigation from './Components/MainNavigation';
 
 export default function Home() {
   // PUSH NOTIFICATION
   const { isSubscribed } = usePushNotification();
 
-  // USER LOCATION (browser)
-  const { coords, modalOpen, requestLocation, ignoreLocation } =
-    useUserLocation();
-
   // LOCATION + PRAYER CONTEXT
   const {
     coords: ctxCoords,
-    setCoords,
+    updateCoords,
     getLocationName,
     locationName,
     prayers,
@@ -30,18 +26,14 @@ export default function Home() {
     setPrayerData,
   } = useLocationContext();
 
+  // USER LOCATION (browser)
+  const { coords, modalOpen, requestLocation, ignoreLocation } =
+    useUserLocation(updateCoords);
+
   const userId = getOrCreateUserId();
 
   const [btnLoading, setBtnLoading] = useState(false);
   const [locationStatus, setLocationStatus] = useState(null);
-
-  useEffect(() => {
-    if (!coords || ctxCoords) return;
-
-    // ⬅️ First load ONLY
-    setCoords(coords);
-    getLocationName(coords.lat, coords.lon);
-  }, [coords, ctxCoords]);
 
   /* =========================
      UPDATE CONTEXT COORDS
@@ -54,10 +46,10 @@ export default function Home() {
 
     if (!isSame) {
       setCoords(coords);
-      getLocationName(coords.lat, coords.lon);
-      setLocationStatus("different");
+      getLocationName(ctxCoords.lat, ctxCoords.lon);
+      setLocationStatus('different');
     } else {
-      setLocationStatus("same");
+      setLocationStatus('same');
     }
 
     setBtnLoading(false);
@@ -80,9 +72,9 @@ export default function Home() {
 
     (async () => {
       try {
-        const res = await fetch("/api/prayer-times", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
+        const res = await fetch('/api/prayer-times', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
             lat: ctxCoords.lat,
             lon: ctxCoords.lon,
@@ -94,9 +86,10 @@ export default function Home() {
 
         if (json?.data?.timings) {
           setPrayerData(json.data.timings, ctxCoords);
+          getLocationName(ctxCoords.lat, ctxCoords.lon);
         }
       } catch (err) {
-        console.error("Failed fetching prayer times", err);
+        console.error('Failed fetching prayer times', err);
       }
     })();
   }, [ctxCoords, userId]);
@@ -128,10 +121,10 @@ export default function Home() {
         onIgnore={ignoreLocation}
       />
 
-      <div className="flex min-h-screen flex-col bg-zinc-50 dark:bg-black font-sans">
-        <main className="flex flex-col w-full max-w-3xl mx-auto px-4 pt-16 pb-32 gap-4">
+      <div className='flex min-h-screen flex-col bg-zinc-50 dark:bg-black font-sans'>
+        <main className='flex flex-col w-full max-w-3xl mx-auto px-4 pt-16 pb-32 gap-4'>
           <PrayerCards prayers={prayers} locationName={locationName} />
-          <div className="flex flex-row sm:justify-items-normal items-center gap-3 mt-4">
+          <div className='flex flex-row sm:justify-items-normal items-center gap-3 mt-4'>
             <UpdateLocationButton
               onUpdate={handleUpdateLocation}
               loading={btnLoading}

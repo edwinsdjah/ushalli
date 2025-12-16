@@ -5,13 +5,20 @@ import TopBar from '@/components/ui/TopBar';
 import { useNearbyMasjids } from '../hooks/useNearbyMasjid';
 import { useRouting } from '../hooks/useRouting';
 import { useLocationContext } from '../context/locationContext';
+import useUserLocation from '../hooks/useUserLocation';
+
 import MosqueMap from '../Components/Map/MosqueMap';
 import MosqueBottomCard from '../Components/Map/MosqueBottomCard';
 import MainNavigation from '../Components/MainNavigation';
 
 export default function Page() {
-  const { coords, address: ctxAddress } = useLocationContext();
-  const address = ctxAddress;
+  // 🔹 ambil context
+  const { coords, address, updateCoords } = useLocationContext();
+
+  // 🔹 hook GPS → update ke context
+  const { modalOpen, loading, requestLocation, ignoreLocation } =
+    useUserLocation(updateCoords);
+
   const [radius, setRadius] = useState(2000);
   const userPos = coords;
   const mosques = useNearbyMasjids(userPos, radius);
@@ -28,6 +35,7 @@ export default function Page() {
 
   return (
     <div className='relative h-screen w-full'>
+      {/* TOP BAR */}
       <TopBar
         address={address}
         radius={radius}
@@ -40,6 +48,7 @@ export default function Page() {
         }}
       />
 
+      {/* MAP */}
       <MosqueMap
         userPos={userPos}
         radius={radius}
@@ -51,12 +60,14 @@ export default function Page() {
         selectedMosque={selectedMosque}
       />
 
+      {/* BOTTOM CARD */}
       <MosqueBottomCard
         mosque={selectedMosque}
         routeInfo={routeInfo}
         onRoute={routeTo}
         onCancel={handleCancel}
       />
+
       <MainNavigation visible={!selectedMosque} />
     </div>
   );

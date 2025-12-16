@@ -17,9 +17,10 @@ export default function MosqueMapClient({
   onSelectMosque,
   selectedMosque,
 }) {
+  const center = userPos ? [userPos.lat, userPos.lon] : [-6.2, 106.8];
   return (
     <MapContainer
-      center={[-6.2, 106.8]}
+      center={center}
       zoom={13}
       className='h-full w-full'
       zoomControl={false}
@@ -39,12 +40,7 @@ export default function MosqueMapClient({
         selectedMosque={selectedMosque}
       />
       <RoutePolyline route={route} />
-      <MapController
-        userPos={userPos}
-        route={route}
-        isRouting={isRouting}
-        selectedMosque={selectedMosque}
-      />
+      <MapController route={route} isRouting={isRouting} />
     </MapContainer>
   );
 }
