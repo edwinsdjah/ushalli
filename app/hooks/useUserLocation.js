@@ -2,14 +2,14 @@
 
 import { useState, useEffect, useCallback, useRef } from 'react';
 
-export default function useUserLocation() {
+export default function useUserLocation(onChange) {
   const [coords, setCoords] = useState(null);
   const [loading, setLoading] = useState(true);
   const [modalOpen, setModalOpen] = useState(false);
 
   const watchIdRef = useRef(null);
 
-  // 1️⃣ Init: cek izin & cache
+  // 1️⃣ Init
   useEffect(() => {
     const alreadyAsked = localStorage.getItem('location_requested');
 
@@ -19,16 +19,21 @@ export default function useUserLocation() {
       return;
     }
 
-    // load dari cache dulu (biar map langsung muncul)
     const saved = localStorage.getItem('user_coords');
-    if (saved) setCoords(JSON.parse(saved));
+    if (saved) {
+      const parsed = JSON.parse(saved);
+      setCoords(parsed);
+      onChange?.(parsed);
+    }
 
+    startWatching(); // ⬅️ PENTING
     setLoading(false);
   }, []);
 
-  // 2️⃣ Start watch GPS
+  // 2️⃣ Watch GPS
   const startWatching = useCallback(() => {
     if (!('geolocation' in navigator)) return;
+    if (watchIdRef.current !== null) return;
 
     watchIdRef.current = navigator.geolocation.watchPosition(
       pos => {
@@ -40,19 +45,18 @@ export default function useUserLocation() {
 
         setCoords(c);
         localStorage.setItem('user_coords', JSON.stringify(c));
+        onChange?.(c); // ⬅️ kirim ke context
       },
-      err => {
-        console.error('Location error:', err);
-      },
+      err => console.error('Location error:', err),
       {
         enableHighAccuracy: true,
         maximumAge: 5000,
         timeout: 10000,
       }
     );
-  }, []);
+  }, [onChange]);
 
-  // 3️⃣ Request permission (dari modal)
+  // 3️⃣ Request permission
   const requestLocation = useCallback(() => {
     setModalOpen(false);
     setLoading(true);
@@ -69,6 +73,7 @@ export default function useUserLocation() {
 
         setCoords(c);
         localStorage.setItem('user_coords', JSON.stringify(c));
+        onChange?.(c);
 
         startWatching();
         setLoading(false);
@@ -78,15 +83,14 @@ export default function useUserLocation() {
         setLoading(false);
       }
     );
-  }, [startWatching]);
+  }, [startWatching, onChange]);
 
-  // 4️⃣ Ignore
   const ignoreLocation = useCallback(() => {
     localStorage.setItem('location_requested', 'true');
     setModalOpen(false);
   }, []);
 
-  // 5️⃣ Cleanup saat unmount
+  // 4️⃣ Cleanup
   useEffect(() => {
     return () => {
       if (watchIdRef.current !== null) {
