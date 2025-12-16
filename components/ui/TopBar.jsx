@@ -1,4 +1,6 @@
 import { PersonStanding, Bike, Car } from 'lucide-react';
+import Link from 'next/link';
+import Image from 'next/image';
 
 const ROUTE_MODES = [
   { key: 'walk', icon: PersonStanding },
@@ -16,9 +18,18 @@ export default function TopBar({
 }) {
   return (
     <div className='absolute top-0 z-[1000] w-full'>
-      <div className='backdrop-blur p-3 shadow-sm'>
+      <div className='backdrop-blur p-4 shadow-sm'>
         {/* ADDRESS */}
-        <div className='bg-gray-100 rounded-2xl px-4 py-2'>
+         <Link href="/" className="flex items-center">
+          <Image
+            src="/logo.png"      // ganti sesuai file logo kamu
+            alt="Ushalli Logo"
+            width={85}
+            height={85}
+            priority
+          />
+        </Link>
+        <div className='bg-gray-100 rounded-2xl px-4 py-4 mt-2'>
           <div className='text-[11px] text-gray-500'>Lokasi Anda</div>
           <div className='text-sm font-medium text-gray-800 truncate'>
             {address}

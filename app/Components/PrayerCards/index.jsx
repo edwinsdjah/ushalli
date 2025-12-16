@@ -45,7 +45,27 @@ export default function PrayerCards({ prayers, locationName }) {
     usePrayerCountdown(prayers || {});
 
   return (
-    <div
+    <>
+    <div className='text-right'>
+          <p className='text-sm font-semibold text-gray-800'>
+            {new Date().toLocaleDateString('id-ID', {
+              weekday: 'long',
+              day: 'numeric',
+              month: 'long',
+              year: 'numeric',
+            })}
+          </p>
+
+          <p className='text-xs text-gray-500 mt-1'>
+            Lokasi{' '}
+            {isLoading ? (
+              <SkeletonBox className='inline-block w-24 h-3 ml-1' />
+            ) : (
+              locationName
+            )}
+          </p>
+        </div>
+        <div
       className='
         mx-auto w-full max-w-3xl
         rounded-3xl p-6
@@ -73,25 +93,7 @@ export default function PrayerCards({ prayers, locationName }) {
           </div>
         </div>
 
-        <div className='md:text-right'>
-          <p className='text-sm font-semibold text-gray-800'>
-            {new Date().toLocaleDateString('id-ID', {
-              weekday: 'long',
-              day: 'numeric',
-              month: 'long',
-              year: 'numeric',
-            })}
-          </p>
-
-          <p className='text-xs text-gray-500 mt-1'>
-            Lokasi{' '}
-            {isLoading ? (
-              <SkeletonBox className='inline-block w-24 h-3 ml-1' />
-            ) : (
-              locationName
-            )}
-          </p>
-        </div>
+        
       </div>
 
       {/* ================= PRAYER LIST ================= */}
@@ -129,7 +131,7 @@ export default function PrayerCards({ prayers, locationName }) {
                   }
                 `}
               >
-                <div className='text-xs font-medium text-gray-500'>
+                <div className='text-xs font-medium '>
                   {prayerNames[key]}
                 </div>
 
@@ -145,5 +147,7 @@ export default function PrayerCards({ prayers, locationName }) {
           })}
       </div>
     </div>
+    </>
+    
   );
 }

@@ -35,20 +35,32 @@ export default function Home() {
   const [btnLoading, setBtnLoading] = useState(false);
   const [locationStatus, setLocationStatus] = useState(null);
 
+  useEffect(() => {
+    if (!coords || ctxCoords) return;
+
+    // ⬅️ First load ONLY
+    setCoords(coords);
+    getLocationName(coords.lat, coords.lon);
+  }, [coords, ctxCoords]);
+
   /* =========================
      UPDATE CONTEXT COORDS
   ========================== */
   useEffect(() => {
-    if (!coords) return;
+    if (!coords || !btnLoading) return;
 
-    if (
-      !ctxCoords ||
-      ctxCoords.lat !== coords.lat ||
-      ctxCoords.lon !== coords.lon
-    ) {
+    const isSame =
+      ctxCoords && ctxCoords.lat === coords.lat && ctxCoords.lon === coords.lon;
+
+    if (!isSame) {
       setCoords(coords);
-      getLocationName(coords.lat, coords.lon); // async, set di context
+      getLocationName(coords.lat, coords.lon);
+      setLocationStatus("different");
+    } else {
+      setLocationStatus("same");
     }
+
+    setBtnLoading(false);
   }, [coords]);
 
   /* =========================
@@ -56,7 +68,6 @@ export default function Home() {
   ========================== */
   useEffect(() => {
     if (!ctxCoords || !userId) return;
-
     // ⛔️ Skip fetch jika masih valid
     if (
       prayers &&
@@ -94,9 +105,9 @@ export default function Home() {
      UPDATE LOCATION BUTTON
   ========================== */
   const handleUpdateLocation = async () => {
+    if (btnLoading) return;
     setBtnLoading(true);
-    await requestLocation(); // biarkan effect yang bekerja
-    setBtnLoading(false);
+    await requestLocation(); // biarkan effect yang mematikan loading
   };
 
   /* =========================
@@ -118,12 +129,9 @@ export default function Home() {
       />
 
       <div className="flex min-h-screen flex-col bg-zinc-50 dark:bg-black font-sans">
-        <main className="flex flex-col w-full max-w-3xl mx-auto px-4 pt-16 pb-32 gap-6">
-          <h1 className="text-3xl font-bold text-gray-900 dark:text-white">
-            Jadwal Sholat
-          </h1>
+        <main className="flex flex-col w-full max-w-3xl mx-auto px-4 pt-16 pb-32 gap-4">
           <PrayerCards prayers={prayers} locationName={locationName} />
-          <div className="flex flex-col sm:flex-row sm:justify-items-normal items-center gap-3 mt-4">
+          <div className="flex flex-row sm:justify-items-normal items-center gap-3 mt-4">
             <UpdateLocationButton
               onUpdate={handleUpdateLocation}
               loading={btnLoading}

@@ -1,6 +1,8 @@
-'use client';
+"use client";
 
-import usePushNotification from '@/app/hooks/usePushNotification';
+import usePushNotification from "@/app/hooks/usePushNotification";
+import { Bell, BellOff } from "lucide-react";
+import InstallPWAButton from "./InstallPWAButton";
 
 export default function NotificationToggle() {
   const {
@@ -15,16 +17,21 @@ export default function NotificationToggle() {
   // Browser tidak support
   if (!isSupported) {
     return (
-      <p className='text-sm text-red-500'>
-        Browser kamu tidak mendukung push notification.
-      </p>
+      <>
+        <p className="text-sm text-red-500">
+          Browser kamu tidak mendukung push notification.
+          <br />
+          Silahkan install sebagai PWA melalui button berikut
+        </p>
+        <InstallPWAButton />
+      </>
     );
   }
 
   // User menolak permission
-  if (permission === 'denied') {
+  if (permission === "denied") {
     return (
-      <p className='text-sm text-red-500'>
+      <p className="text-sm text-red-500">
         Kamu menolak notifikasi. Aktifkan kembali dari pengaturan browser.
       </p>
     );
@@ -36,13 +43,13 @@ export default function NotificationToggle() {
     else await subscribeToPush();
   };
 
-  let bgClass = 'bg-[var(--color-royal)] hover:bg-purple-700';
-  let textClass = 'text-white';
+  let bgClass = "bg-[var(--color-royal)] hover:bg-purple-700";
+  let textClass = "text-white";
 
   if (loading) {
-    bgClass = 'bg-gray-500 cursor-not-allowed';
+    bgClass = "bg-gray-500 cursor-not-allowed";
   } else if (isSubscribed) {
-    bgClass = 'bg-yellow-500 hover:bg-yellow-600';
+    bgClass = "bg-yellow-500 hover:bg-yellow-600";
   }
 
   return (
@@ -51,14 +58,16 @@ export default function NotificationToggle() {
       onClick={handleToggle}
       className={`px-5 py-3 rounded-2xl font-semibold shadow-md transition-all transform
         ${bgClass} ${textClass} ${
-        !loading && 'hover:scale-105 active:scale-95'
+        !loading && "hover:scale-105 active:scale-95"
       }`}
     >
-      {loading
-        ? 'Processing...'
-        : isSubscribed
-        ? 'Matikan Pengingat Waktu Sholat'
-        : 'Aktifkan Pengingat Waktu Sholat'}
+      {loading ? (
+        "Processing..."
+      ) : isSubscribed ? (
+        <BellOff className="w-5 h-5" />
+      ) : (
+        <Bell className="w-5 h-5" />
+      )}
     </button>
   );
 }

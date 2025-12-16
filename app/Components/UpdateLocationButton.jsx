@@ -1,14 +1,7 @@
 import React from 'react';
+import { LocateFixed, RefreshCw, CheckCircle, MapPin } from 'lucide-react';
 
 const UpdateLocationButton = ({ onUpdate, loading, locationStatus }) => {
-  let buttonText = 'Perbarui Lokasi Anda';
-
-  if (loading) buttonText = 'Loading...';
-  else if (locationStatus === 'same')
-    buttonText = 'Koordinat Lokasi masih sama';
-  else if (locationStatus === 'different')
-    buttonText = 'Lokasi berhasil diperbarui';
-
   let bgClass = 'bg-[var(--color-royal)] hover:bg-purple-700';
   let textClass = 'text-white';
 
@@ -31,7 +24,15 @@ const UpdateLocationButton = ({ onUpdate, loading, locationStatus }) => {
         ${!loading && 'hover:scale-105 active:scale-95'}
       `}
     >
-      {buttonText}
+      {loading ? (
+        <RefreshCw className="w-5 h-5 animate-spin" />
+      ) : locationStatus === 'same' ? (
+        <MapPin className="w-5 h-5" />
+      ) : locationStatus === 'different' ? (
+        <CheckCircle className="w-5 h-5" />
+      ) : (
+        <LocateFixed className="w-5 h-5" />
+      )}
     </button>
   );
 };
