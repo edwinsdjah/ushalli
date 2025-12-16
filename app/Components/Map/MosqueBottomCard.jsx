@@ -57,7 +57,7 @@ export default function MosqueBottomCard({
           <div className='flex flex-col gap-2'>
             {!isRouting && (
               <button
-                onClick={() => onRoute(mosque.position, 'drive')}
+                onClick={() => onRoute(mosque.position, 'bicycle')}
                 className='
                   px-4 py-2 rounded-xl text-sm font-medium
                   bg-blue-600 text-white

@@ -5,13 +5,23 @@ import { userDivIcon } from '../../../utils/icons/user';
 export default function UserMarker({ position, radius }) {
   if (!position) return null;
 
+  const latlng = [position.lat, position.lon];
+
   return (
     <>
-      <FlyTo position={position} />
-      <Marker position={position} icon={userDivIcon} zIndexOffset={1000}>
+      <FlyTo position={latlng} />
+
+      <Marker position={latlng} icon={userDivIcon} zIndexOffset={1000}>
         <Popup>Lokasi Anda</Popup>
       </Marker>
-      <Circle center={position} radius={radius} />
+
+      {radius && (
+        <Circle
+          center={latlng}
+          radius={radius}
+          pathOptions={{ opacity: 0.3 }}
+        />
+      )}
     </>
   );
 }

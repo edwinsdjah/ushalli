@@ -39,7 +39,12 @@ export default function MosqueMapClient({
         selectedMosque={selectedMosque}
       />
       <RoutePolyline route={route} />
-      <MapController route={route} />
+      <MapController
+        userPos={userPos}
+        route={route}
+        isRouting={isRouting}
+        selectedMosque={selectedMosque}
+      />
     </MapContainer>
   );
 }
