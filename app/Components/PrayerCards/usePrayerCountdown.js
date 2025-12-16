@@ -9,7 +9,12 @@ export default function usePrayerCountdown(prayers) {
   const [currentPrayer, setCurrentPrayer] = useState("");
 
   useEffect(() => {
-    if (!prayers) return;
+    if (!prayers || Object.keys(prayers).length === 0) {
+      setCountdown("--:--:--");
+      setNextPrayer(null);
+      setCurrentPrayer(null);
+      return;
+    }
 
     const tick = () => {
       const next = getNextPrayer(prayers);

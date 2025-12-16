@@ -5,10 +5,16 @@ import { createContext, useContext, useState, useCallback } from 'react';
 const LocationContext = createContext(null);
 
 export function LocationProvider({ children }) {
+  // LOCATION STATE
   const [coords, setCoords] = useState(null);
   const [address, setAddress] = useState(null);
   const [locationName, setLocationName] = useState('');
 
+  // PRAYER STATE (CACHE)
+  const [prayers, setPrayers] = useState(null);
+  const [lastPrayerCoords, setLastPrayerCoords] = useState(null);
+
+  // GET LOCATION NAME
   const getLocationName = useCallback(async (lat, lon) => {
     try {
       const res = await fetch(
@@ -18,7 +24,7 @@ export function LocationProvider({ children }) {
       if (!res.ok) throw new Error('Gagal mendapatkan nama lokasi');
 
       const data = await res.json();
-      console.log(data);
+
       const city =
         data.address.suburb ||
         data.address.town ||
@@ -26,6 +32,7 @@ export function LocationProvider({ children }) {
         data.address.county ||
         data.address.state ||
         data.address.city;
+
       setAddress(data.display_name || 'Alamat tidak ditemukan');
       setLocationName(city || 'Lokasi tidak ditemukan');
 
@@ -36,14 +43,26 @@ export function LocationProvider({ children }) {
     }
   }, []);
 
+  // HELPER: set prayer data + coords
+  const setPrayerData = useCallback((timings, coords) => {
+    setPrayers(timings);
+    setLastPrayerCoords(coords);
+  }, []);
+
   return (
     <LocationContext.Provider
       value={{
+        // location
         coords,
         setCoords,
         locationName,
-        getLocationName,
         address,
+        getLocationName,
+
+        // prayer cache
+        prayers,
+        lastPrayerCoords,
+        setPrayerData,
       }}
     >
       {children}
