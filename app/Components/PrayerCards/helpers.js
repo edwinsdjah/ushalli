@@ -41,8 +41,16 @@ export function getCurrentPrayer(t, now = new Date()) {
       ? times[i + 1]
       : { time: getTomorrowFajr(t, now) };
 
+    // ❌ skip sunrise sebagai current prayer
+    if (current.name === "sunrise") continue;
+
     if (now >= current.time && now < next.time) {
-      return current.name === "sunrise" ? "" : current.name;
+      // ⛔️ Subuh BERAKHIR di Terbit
+      if (current.name === "fajr" && next.name === "sunrise") {
+        return "fajr";
+      }
+
+      return current.name;
     }
   }
 
@@ -50,13 +58,21 @@ export function getCurrentPrayer(t, now = new Date()) {
 }
 
 export function getNextPrayer(t, now = new Date()) {
+  const fajr = toDate(now.toISOString().split("T")[0], t.fajr);
+  const sunrise = toDate(now.toISOString().split("T")[0], t.sunrise);
+  const dhuhr = toDate(now.toISOString().split("T")[0], t.dhuhr);
+
+  // 🌅 Setelah Terbit → langsung ke Zuhur
+  if (now >= sunrise && now < dhuhr) {
+    return { name: "dhuhr", time: dhuhr };
+  }
+
   const times = buildTimes(t, false, now);
 
   for (const item of times) {
     if (item.time > now) return item;
   }
 
-  // After Isha → next prayer = tomorrow Fajr
   return { name: "fajr", time: getTomorrowFajr(t, now) };
 }
 

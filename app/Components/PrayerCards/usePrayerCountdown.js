@@ -23,6 +23,11 @@ export default function usePrayerCountdown(prayers) {
       const now = new Date();
       const diff = next.time - now;
 
+      if (!next || !next.time) {
+        setCountdown("--:--:--");
+        return;
+      }
+
       if (diff <= 0) {
         setCurrentPrayer(current);
         setNextPrayer(next.name);
