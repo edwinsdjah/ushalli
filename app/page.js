@@ -26,8 +26,8 @@ export default function Home() {
     setPrayerData,
   } = useLocationContext();
 
-  // USER LOCATION (browser)
-  const { coords, modalOpen, requestLocation, ignoreLocation } =
+  // USER LOCATION (browser) → AUTO UPDATE CONTEXT
+  const { modalOpen, requestLocation, ignoreLocation } =
     useUserLocation(updateCoords);
 
   const userId = getOrCreateUserId();
@@ -36,31 +36,11 @@ export default function Home() {
   const [locationStatus, setLocationStatus] = useState(null);
 
   /* =========================
-     UPDATE CONTEXT COORDS
-  ========================== */
-  useEffect(() => {
-    if (!coords || !btnLoading) return;
-
-    const isSame =
-      ctxCoords && ctxCoords.lat === coords.lat && ctxCoords.lon === coords.lon;
-
-    if (!isSame) {
-      setCoords(coords);
-      getLocationName(ctxCoords.lat, ctxCoords.lon);
-      setLocationStatus('different');
-    } else {
-      setLocationStatus('same');
-    }
-
-    setBtnLoading(false);
-  }, [coords]);
-
-  /* =========================
      FETCH PRAYER TIMES (CACHED)
   ========================== */
   useEffect(() => {
     if (!ctxCoords || !userId) return;
-    // ⛔️ Skip fetch jika masih valid
+
     if (
       prayers &&
       lastPrayerCoords &&
@@ -100,7 +80,9 @@ export default function Home() {
   const handleUpdateLocation = async () => {
     if (btnLoading) return;
     setBtnLoading(true);
-    await requestLocation(); // biarkan effect yang mematikan loading
+    await requestLocation();
+    setLocationStatus('updated');
+    setBtnLoading(false);
   };
 
   /* =========================
@@ -114,7 +96,6 @@ export default function Home() {
 
   return (
     <>
-      {/* Location Modal */}
       <LocationModal
         open={modalOpen}
         onAllow={requestLocation}
@@ -124,7 +105,7 @@ export default function Home() {
       <div className='flex min-h-screen flex-col bg-zinc-50 dark:bg-black font-sans'>
         <main className='flex flex-col w-full max-w-3xl mx-auto px-4 pt-16 pb-32 gap-4'>
           <PrayerCards prayers={prayers} locationName={locationName} />
-          <div className='flex flex-row sm:justify-items-normal items-center gap-3 mt-4'>
+          <div className='flex flex-row items-center gap-3 mt-4'>
             <UpdateLocationButton
               onUpdate={handleUpdateLocation}
               loading={btnLoading}

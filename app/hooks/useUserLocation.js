@@ -6,10 +6,39 @@ export default function useUserLocation(onChange) {
   const [coords, setCoords] = useState(null);
   const [loading, setLoading] = useState(true);
   const [modalOpen, setModalOpen] = useState(false);
-
   const watchIdRef = useRef(null);
 
-  // 1️⃣ Init
+  /* =========================
+     START WATCHING GPS
+  ========================== */
+  const startWatching = useCallback(() => {
+    if (!('geolocation' in navigator)) return;
+    if (watchIdRef.current !== null) return;
+
+    watchIdRef.current = navigator.geolocation.watchPosition(
+      pos => {
+        const c = {
+          lat: pos.coords.latitude,
+          lon: pos.coords.longitude,
+          accuracy: pos.coords.accuracy,
+        };
+
+        setCoords(c);
+        localStorage.setItem('user_coords', JSON.stringify(c));
+        onChange?.(c);
+      },
+      err => console.error('Location error:', err),
+      {
+        enableHighAccuracy: true,
+        maximumAge: 5000,
+        timeout: 10000,
+      }
+    );
+  }, [onChange]);
+
+  /* =========================
+     INIT (CACHE + PERMISSION)
+  ========================== */
   useEffect(() => {
     const alreadyAsked = localStorage.getItem('location_requested');
 
@@ -26,37 +55,13 @@ export default function useUserLocation(onChange) {
       onChange?.(parsed);
     }
 
-    startWatching(); // ⬅️ PENTING
+    startWatching();
     setLoading(false);
-  }, []);
+  }, [startWatching, onChange]);
 
-  // 2️⃣ Watch GPS
-  const startWatching = useCallback(() => {
-    if (!('geolocation' in navigator)) return;
-    if (watchIdRef.current !== null) return;
-
-    watchIdRef.current = navigator.geolocation.watchPosition(
-      pos => {
-        const c = {
-          lat: pos.coords.latitude,
-          lon: pos.coords.longitude,
-          accuracy: pos.coords.accuracy,
-        };
-
-        setCoords(c);
-        localStorage.setItem('user_coords', JSON.stringify(c));
-        onChange?.(c); // ⬅️ kirim ke context
-      },
-      err => console.error('Location error:', err),
-      {
-        enableHighAccuracy: true,
-        maximumAge: 5000,
-        timeout: 10000,
-      }
-    );
-  }, [onChange]);
-
-  // 3️⃣ Request permission
+  /* =========================
+     REQUEST PERMISSION (MODAL)
+  ========================== */
   const requestLocation = useCallback(() => {
     setModalOpen(false);
     setLoading(true);
@@ -85,12 +90,17 @@ export default function useUserLocation(onChange) {
     );
   }, [startWatching, onChange]);
 
+  /* =========================
+     IGNORE LOCATION
+  ========================== */
   const ignoreLocation = useCallback(() => {
     localStorage.setItem('location_requested', 'true');
     setModalOpen(false);
   }, []);
 
-  // 4️⃣ Cleanup
+  /* =========================
+     CLEANUP
+  ========================== */
   useEffect(() => {
     return () => {
       if (watchIdRef.current !== null) {

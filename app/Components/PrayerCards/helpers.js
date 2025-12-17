@@ -1,28 +1,28 @@
 export const prayerNames = {
-  fajr: "Subuh",
-  sunrise: "Terbit",
-  dhuhr: "Zuhur",
-  asr: "Asar",
-  maghrib: "Maghrib",
-  isha: "Isya",
+  fajr: 'Subuh',
+  sunrise: 'Terbit',
+  dhuhr: 'Zuhur',
+  asr: 'Asar',
+  maghrib: 'Maghrib',
+  isha: 'Isya',
 };
 
-const orderWithSunrise = ["fajr", "sunrise", "dhuhr", "asr", "maghrib", "isha"];
-const prayerOrder = ["fajr", "dhuhr", "asr", "maghrib", "isha"];
+const orderWithSunrise = ['fajr', 'sunrise', 'dhuhr', 'asr', 'maghrib', 'isha'];
+const prayerOrder = ['fajr', 'dhuhr', 'asr', 'maghrib', 'isha'];
 
 /** Convert "HH:mm" → Date */
 function toDate(today, hm) {
-  const [h, m] = hm.split(":");
+  const [h, m] = hm.split(':');
   return new Date(`${today}T${h}:${m}:00`);
 }
 
 /** Preprocess times once only */
 function buildTimes(t, includeSunrise = false, date = new Date()) {
-  const today = date.toISOString().split("T")[0];
+  const today = date.toISOString().split('T')[0];
   const list = includeSunrise ? orderWithSunrise : prayerOrder;
 
   return list
-    .map((name) => {
+    .map(name => {
       if (!t[name]) return null;
       return {
         name,
@@ -32,54 +32,68 @@ function buildTimes(t, includeSunrise = false, date = new Date()) {
     .filter(Boolean);
 }
 
+function safeToDate(baseDate, hm) {
+  if (!hm) return null;
+
+  const [h, m] = hm.split(':').map(Number);
+  const d = new Date(baseDate);
+  d.setHours(h, m, 0, 0);
+  return d;
+}
+
 export function getCurrentPrayer(t, now = new Date()) {
-  const times = buildTimes(t, true, now);
+  const fajr = safeToDate(now, t.fajr);
+  const sunrise = safeToDate(now, t.sunrise);
+  const dhuhr = safeToDate(now, t.dhuhr);
+  const asr = safeToDate(now, t.asr);
+  const maghrib = safeToDate(now, t.maghrib);
+  const isha = safeToDate(now, t.isha);
 
-  for (let i = 0; i < times.length; i++) {
-    const current = times[i];
-    const next = times[i + 1]
-      ? times[i + 1]
-      : { time: getTomorrowFajr(t, now) };
+  if (fajr && sunrise && now >= fajr && now < sunrise) return 'fajr';
+  if (dhuhr && asr && now >= dhuhr && now < asr) return 'dhuhr';
+  if (asr && maghrib && now >= asr && now < maghrib) return 'asr';
+  if (maghrib && isha && now >= maghrib && now < isha) return 'maghrib';
+  if (isha && now >= isha) return 'isha';
 
-    // ❌ skip sunrise sebagai current prayer
-    if (current.name === "sunrise") continue;
-
-    if (now >= current.time && now < next.time) {
-      // ⛔️ Subuh BERAKHIR di Terbit
-      if (current.name === "fajr" && next.name === "sunrise") {
-        return "fajr";
-      }
-
-      return current.name;
-    }
-  }
-
+  // 🌅 setelah terbit & sebelum zuhur
   return null;
 }
 
 export function getNextPrayer(t, now = new Date()) {
-  const fajr = toDate(now.toISOString().split("T")[0], t.fajr);
-  const sunrise = toDate(now.toISOString().split("T")[0], t.sunrise);
-  const dhuhr = toDate(now.toISOString().split("T")[0], t.dhuhr);
+  const fajr = safeToDate(now, t.fajr);
+  const sunrise = safeToDate(now, t.sunrise);
+  const dhuhr = safeToDate(now, t.dhuhr);
+  const asr = safeToDate(now, t.asr);
+  const maghrib = safeToDate(now, t.maghrib);
+  const isha = safeToDate(now, t.isha);
 
-  // 🌅 Setelah Terbit → langsung ke Zuhur
-  if (now >= sunrise && now < dhuhr) {
-    return { name: "dhuhr", time: dhuhr };
+  // ⏰ sebelum subuh
+  if (fajr && now < fajr) {
+    return { name: 'fajr', time: fajr };
   }
 
-  const times = buildTimes(t, false, now);
-
-  for (const item of times) {
-    if (item.time > now) return item;
+  // 🌅 setelah subuh & sebelum terbit → terbit
+  if (sunrise && now >= fajr && now < sunrise) {
+    return { name: 'sunrise', time: sunrise };
   }
 
-  return { name: "fajr", time: getTomorrowFajr(t, now) };
+  // 🌞 SETELAH TERBIT → LANGSUNG ZUHUR (INI YANG HILANG)
+  if (dhuhr && sunrise && now >= sunrise && now < dhuhr) {
+    return { name: 'dhuhr', time: dhuhr };
+  }
+
+  if (asr && now < asr) return { name: 'asr', time: asr };
+  if (maghrib && now < maghrib) return { name: 'maghrib', time: maghrib };
+  if (isha && now < isha) return { name: 'isha', time: isha };
+
+  // 🌙 lewat isya → subuh besok
+  return { name: 'fajr', time: getTomorrowFajr(t, now) };
 }
 
 export function getTomorrowFajr(t, now = new Date()) {
-  const [h, m] = t.fajr.split(":");
+  const [h, m] = t.fajr.split(':');
   const d = new Date(now);
   d.setDate(d.getDate() + 1);
-  const nextDate = d.toISOString().split("T")[0];
+  const nextDate = d.toISOString().split('T')[0];
   return new Date(`${nextDate}T${h}:${m}:00`);
 }
