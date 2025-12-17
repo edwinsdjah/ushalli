@@ -79,10 +79,18 @@ export default function Home() {
   ========================== */
   const handleUpdateLocation = async () => {
     if (btnLoading) return;
+
     setBtnLoading(true);
-    await requestLocation();
-    setLocationStatus('updated');
-    setBtnLoading(false);
+    setLocationStatus('updating');
+
+    try {
+      await requestLocation(); // ✅ tunggu selesai
+      setLocationStatus('updated');
+    } catch (err) {
+      setLocationStatus('failed');
+    } finally {
+      setBtnLoading(false); // ✅ INI YANG HILANG SEBELUMNYA
+    }
   };
 
   /* =========================

@@ -66,28 +66,32 @@ export default function useUserLocation(onChange) {
     setModalOpen(false);
     setLoading(true);
 
-    navigator.geolocation.getCurrentPosition(
-      pos => {
-        localStorage.setItem('location_requested', 'true');
+    return new Promise((resolve, reject) => {
+      navigator.geolocation.getCurrentPosition(
+        pos => {
+          localStorage.setItem('location_requested', 'true');
 
-        const c = {
-          lat: pos.coords.latitude,
-          lon: pos.coords.longitude,
-          accuracy: pos.coords.accuracy,
-        };
+          const c = {
+            lat: pos.coords.latitude,
+            lon: pos.coords.longitude,
+            accuracy: pos.coords.accuracy,
+          };
 
-        setCoords(c);
-        localStorage.setItem('user_coords', JSON.stringify(c));
-        onChange?.(c);
+          setCoords(c);
+          localStorage.setItem('user_coords', JSON.stringify(c));
+          onChange?.(c);
 
-        startWatching();
-        setLoading(false);
-      },
-      err => {
-        console.error('Location error:', err);
-        setLoading(false);
-      }
-    );
+          startWatching();
+          setLoading(false);
+          resolve(c); // ✅ selesai
+        },
+        err => {
+          console.error('Location error:', err);
+          setLoading(false);
+          reject(err); // ✅ error
+        }
+      );
+    });
   }, [startWatching, onChange]);
 
   /* =========================
