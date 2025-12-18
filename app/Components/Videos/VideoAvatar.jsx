@@ -12,7 +12,7 @@ const VideoAvatar = ({ loadVideos }) => {
   };
 
   return (
-    <div className="flex gap-4 overflow-x-auto pb-2">
+    <div className="flex gap-4 overflow-x-auto pb-2 no-scrollbar">
       {USTADZ_LIST.map(ustadz => (
         <button
           key={ustadz.slug}

@@ -12,6 +12,7 @@ import UpdateLocationButton from "./Components/UpdateLocationButton";
 import MainNavigation from "./Components/MainNavigation";
 import HomeBanner from "./Components/HomeBanner";
 import RandomVideoSlider from "./Components/Videos/RandomVideoSlider";
+import VideoCard from "./Components/Videos/VideoCard";
 
 export default function Home() {
   // PUSH NOTIFICATION
