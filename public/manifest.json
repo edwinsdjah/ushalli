@@ -3,9 +3,9 @@
   "short_name": "Ushalli",
   "start_url": "/",
   "display": "standalone",
+  "orientation": "portrait",
   "theme_color": "#ffffff",
   "background_color": "#ffffff",
-  "orientation": "portrait",
   "icons": [
     {
       "src": "/icons/icon-192.png",
@@ -16,6 +16,12 @@
       "src": "/icons/icon-512.png",
       "sizes": "512x512",
       "type": "image/png"
+    },
+    {
+      "src": "/icons/icon-512-maskable.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "maskable"
     }
   ]
 }
