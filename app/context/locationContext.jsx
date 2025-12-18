@@ -26,7 +26,6 @@ export function LocationProvider({ children }) {
       if (!res.ok) throw new Error();
       
       const data = await res.json();
-      console.log(data)
       const city =
         data.address.suburb ||
         data.address.town ||

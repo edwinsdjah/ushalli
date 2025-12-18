@@ -23,9 +23,6 @@ export function haversineDistance(a, b) {
   const lon1 = a.lon; // support lon atau lng
   const lat2 = b[0];
   const lon2 = b[1];
-
-  console.log(lat1, lon1, lat2, lon2);
-
   if (
     typeof lat1 !== "number" ||
     typeof lon1 !== "number" ||
