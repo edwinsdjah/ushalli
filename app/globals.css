@@ -137,6 +137,33 @@ body {
   display: none; /* Chrome, Safari */
 }
 
+/* globals.css */
+
+html,
+body {
+  margin: 0;
+  padding: 0;
+  height: 100%;
+  background: #ffffff;
+}
+
+/* Body fullscreen */
+.pwa-body {
+  min-height: 100vh;
+  background: #ffffff;
+  overscroll-behavior-y: none;
+}
+
+/* SAFE AREA UTAMA */
+.app-safe {
+  min-height: 100vh;
+
+  padding-top: env(safe-area-inset-top);
+  padding-right: env(safe-area-inset-right);
+  padding-bottom: env(safe-area-inset-bottom);
+  padding-left: env(safe-area-inset-left);
+}
+
 @keyframes shimmer {
   0% {
     background-position: -200% 0;

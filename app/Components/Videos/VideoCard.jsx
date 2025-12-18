@@ -9,7 +9,7 @@ export default function VideoCard({
   showUstadz = false,
 }) {
   return (
-    <div className='space-y-1.5'>
+    <div className='space-y-2'>
       {/* VIDEO */}
       <div className='relative aspect-video rounded-2xl overflow-hidden bg-black group'>
         {isActive ? (
@@ -52,7 +52,7 @@ export default function VideoCard({
       </div>
 
       {/* TITLE */}
-      <h3 className='text-sm font-semibold leading-snug line-clamp-2'>
+      <h3 className='text-sm text-black leading-snug line-clamp-2'>
         {video.title}
       </h3>
 

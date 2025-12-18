@@ -11,6 +11,7 @@ export default function RandomVideoSlider({ videos }) {
       <div
         className='
           flex gap-4 overflow-x-auto
+          mx-4
           snap-x snap-mandatory
           no-scrollbar
           pr-16

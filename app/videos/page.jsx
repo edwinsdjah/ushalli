@@ -33,7 +33,7 @@ const UstadzPage = () => {
   }, []);
 
   return (
-    <div className='p-4 space-y-5 mt-15 mb-15'>
+    <div className='flex min-h-screen flex-col py-15 px-4 bg-zinc-50 dark:bg-black font-sans'>
       {/* === PILIH USTADZ === */}
       <VideoAvatar loadVideos={loadVideos} />
 
@@ -47,7 +47,6 @@ const UstadzPage = () => {
               <VideoCard
                 key={video.videoId}
                 video={video}
-                showUstadz
                 isActive={activeVideoId === video.videoId}
                 onPlay={() => setActiveVideoId(video.videoId)}
               />

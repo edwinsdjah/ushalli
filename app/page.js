@@ -168,7 +168,9 @@ export default function Home() {
             <NotificationToggle isSubscribed={isSubscribed} />
           </div>
           <HomeBanner />
-          <h2 className='font-semibold mt-6'>Kajian Islami Pilihan Hari Ini</h2>
+          <h2 className='text-black font-semibold mt-6'>
+            Kajian Islami Pilihan Hari Ini
+          </h2>
           {videoLoading ? (
             <RandomVideoSliderSkeleton count={5} />
           ) : (
