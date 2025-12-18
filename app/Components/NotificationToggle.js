@@ -22,8 +22,9 @@ export default function NotificationToggle() {
           Browser kamu tidak mendukung push notification.
           <br />
           Silahkan install sebagai PWA melalui button berikut
+          <br />
+          <InstallPWAButton />
         </p>
-        <InstallPWAButton />
       </>
     );
   }

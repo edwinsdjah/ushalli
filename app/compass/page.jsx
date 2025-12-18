@@ -26,7 +26,7 @@ function calculateQiblaDirection(lat, lon) {
 }
 
 export default function CompassPage() {
-  const { coords } = useLocationContext();
+  const { coords, region, neighborhood } = useLocationContext();
 
   const [heading, setHeading] = useState(0);
   const [qibla, setQibla] = useState(null);
@@ -124,9 +124,9 @@ export default function CompassPage() {
               </div>
 
               {/* Lokasi */}
-              <div className='mt-6 text-center text-gray-700 font-medium'>
-                <p>Latitude: {coords.lat.toFixed(4)}</p>
-                <p>Longitude: {coords.lon.toFixed(4)}</p>
+              <div className='mt-6 text-center font-bold'>
+                <p>{neighborhood}</p>
+                <p>{region}</p>
               </div>
 
               {/* Tombol Aktifkan Sensor */}

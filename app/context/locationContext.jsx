@@ -7,8 +7,9 @@ const LocationContext = createContext(null);
 export function LocationProvider({ children }) {
   const [coords, setCoords] = useState(null);
   const [address, setAddress] = useState(null);
+  const [region, setRegion] = useState(null);
   const [locationName, setLocationName] = useState('');
-
+  const [neighborhood, setNeighborhood] = useState(null);
   const [prayers, setPrayers] = useState(null);
   const [lastPrayerCoords, setLastPrayerCoords] = useState(null);
 
@@ -23,8 +24,9 @@ export function LocationProvider({ children }) {
         `https://nominatim.openstreetmap.org/reverse?lat=${lat}&lon=${lon}&format=json`
       );
       if (!res.ok) throw new Error();
-
+      
       const data = await res.json();
+      console.log(data)
       const city =
         data.address.suburb ||
         data.address.town ||
@@ -32,7 +34,8 @@ export function LocationProvider({ children }) {
         data.address.county ||
         data.address.state ||
         data.address.city;
-
+      setNeighborhood(data.address.neighbourhood)
+      setRegion(data.address.city)
       setAddress(data.display_name || null);
       setLocationName(city || '');
       return city;
@@ -58,6 +61,8 @@ export function LocationProvider({ children }) {
         prayers,
         lastPrayerCoords,
         setPrayerData,
+        neighborhood,
+        region
       }}
     >
       {children}

@@ -1,5 +1,4 @@
 import { Marker, Popup, Circle } from 'react-leaflet';
-import FlyTo from './FlyTo';
 import { userDivIcon } from '../../../utils/icons/user';
 
 export default function UserMarker({ position, radius }) {
@@ -9,8 +8,6 @@ export default function UserMarker({ position, radius }) {
 
   return (
     <>
-      <FlyTo position={latlng} />
-
       <Marker position={latlng} icon={userDivIcon} zIndexOffset={1000}>
         <Popup>Lokasi Anda</Popup>
       </Marker>
