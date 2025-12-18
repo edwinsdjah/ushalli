@@ -17,15 +17,15 @@ export default function NotificationToggle() {
   // Browser tidak support
   if (!isSupported) {
     return (
-      <>
+      <div className="flex flex-row justify-center">
         <p className="text-sm text-red-500">
           Browser kamu tidak mendukung push notification.
           <br />
           Silahkan install sebagai PWA melalui button berikut
           <br />
-          <InstallPWAButton />
         </p>
-      </>
+        <InstallPWAButton />
+      </div>
     );
   }
 
