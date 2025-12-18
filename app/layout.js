@@ -18,7 +18,7 @@ export const metadata = {
   title: 'Ushalli',
   description: 'Prayer Reminder in your Pocket',
   manifest: '/manifest.json',
-  themeColor: '#000000',
+  themeColor: '#ffffff',
   appleWebApp: {
     capable: true,
     statusBarStyle: 'black-translucent',
@@ -31,6 +31,10 @@ export default function RootLayout({ children }) {
     <html lang='en'>
       <head>
         <link rel='manifest' href='/manifest.json' />
+        <meta
+          name='viewport'
+          content='width=device-width, initial-scale=1, viewport-fit=cover'
+        />
         <meta name='theme-color' content='#ffffff' />
         <meta name='apple-mobile-web-app-capable' content='yes' />
         <meta name='apple-mobile-web-app-status-bar-style' content='default' />
@@ -42,14 +46,15 @@ export default function RootLayout({ children }) {
         />
       </head>
       <body
-        className={`${geistSans.variable} ${geistMono.variable} antialiased`}
+        className={`${geistSans.variable} ${geistMono.variable} antialiased pwa-body`}
       >
-        {' '}
-        <LocationProvider>
-          <ServiceWorkerRegister />
-          <Navbar />
-          {children}
-        </LocationProvider>
+        <div className='pwa-body'>
+          <LocationProvider>
+            <ServiceWorkerRegister />
+            <Navbar />
+            {children}
+          </LocationProvider>
+        </div>
       </body>
     </html>
   );
