@@ -14,23 +14,37 @@ export function getDistanceKm(lat1, lon1, lat2, lon2) {
 }
 
 // utils/distance.js
+// utils/distance.js
 export function haversineDistance(a, b) {
   if (!a || !b) return 0;
+
+  // pastikan properti ada
+  const lat1 = a.lat;
+  const lon1 = a.lon; // support lon atau lng
+  const lat2 = b[0];
+  const lon2 = b[1];
+
+  console.log(lat1, lon1, lat2, lon2);
+
+  if (
+    typeof lat1 !== "number" ||
+    typeof lon1 !== "number" ||
+    typeof lat2 !== "number" ||
+    typeof lon2 !== "number"
+  )
+    return 0;
 
   const R = 6371000; // meter
   const toRad = (deg) => (deg * Math.PI) / 180;
 
-  const dLat = toRad(b.lat - a.lat);
-  const dLon = toRad(b.lon - a.lon);
+  const dLat = toRad(lat2 - lat1);
+  const dLon = toRad(lon2 - lon1);
 
-  const lat1 = toRad(a.lat);
-  const lat2 = toRad(b.lat);
-
-  const x =
+  const aCalc =
     Math.sin(dLat / 2) ** 2 +
-    Math.sin(dLon / 2) ** 2 * Math.cos(lat1) * Math.cos(lat2);
+    Math.cos(toRad(lat1)) * Math.cos(toRad(lat2)) * Math.sin(dLon / 2) ** 2;
 
-  return R * 2 * Math.atan2(Math.sqrt(x), Math.sqrt(1 - x));
+  return R * 2 * Math.atan2(Math.sqrt(aCalc), Math.sqrt(1 - aCalc));
 }
 
 // utils/routeUtils.js

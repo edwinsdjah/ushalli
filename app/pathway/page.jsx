@@ -28,31 +28,7 @@ export default function Page() {
   const [selectedMosque, setSelectedMosque] = useState(null);
 
   // Function update rute di bottom map
-  const derivedRouteInfo = useMemo(() => {
-    if (!routeInfo || !selectedMosque || !userPos) return routeInfo;
 
-    const distance = haversineDistance(
-      userPos,
-      selectedMosque.position
-    );
-
-    // estimasi kasar (meter / menit)
-    const SPEED = {
-      walking: 80,   // ~5 km/h
-      bicycle: 250,  // ~15 km/h
-      driving: 600,  // ~36 km/h
-    };
-
-    const speed = SPEED[routeInfo.mode] || SPEED.bicycle;
-
-    return {
-      ...routeInfo,
-      distance,
-      time: Math.max(1, Math.round(distance / speed)),
-    };
-  }, [routeInfo, selectedMosque, userPos]);
-
-  // Function potong polyline yang sudah dilewati
   const trimmedRoute = useMemo(() => {
     if (!route || !userPos) return route;
 
@@ -61,6 +37,35 @@ export default function Page() {
     // jaga-jaga agar tidak kosong
     return route.slice(Math.max(0, index));
   }, [route, userPos]);
+    // Derived route info yang selalu update saat mode berubah
+  const derivedRouteInfo = useMemo(() => {
+  if (!routeInfo || !selectedMosque || !userPos || !route) return null;
+
+  // ambil rute yang sudah dipotong
+  const activeRoute = trimmedRoute;
+
+  // hitung total jarak sepanjang polyline (meter)
+  let distance = 0;
+  for (let i = 1; i < activeRoute.length; i++) {
+    const [lat1, lon1] = activeRoute[i - 1];
+    const [lat2, lon2] = activeRoute[i];
+    distance += haversineDistance({ lat: lat1, lon: lon1 }, [lat2, lon2]);
+  }
+
+  const SPEED = { walk: 80, bicycle: 250, drive: 600 }; // m/menit
+  const speed = SPEED[routeInfo.mode] || SPEED.bicycle;
+
+  return {
+    ...routeInfo,
+    distance: Math.round(distance),
+    time: distance > 0 ? Math.max(1, Math.round(distance / speed)) : null,
+  };
+}, [routeInfo, selectedMosque, userPos, trimmedRoute]); // tambahkan trimmedRoute sebagai dependency
+
+
+
+  // Function potong polyline yang sudah dilewati
+  
 
   const handleCancel = () => {
     clearRoute();
