@@ -1,18 +1,22 @@
-"use client";
+'use client';
 
-import { useEffect, useState } from "react";
-import NotificationToggle from "@/app/Components/NotificationToggle";
-import LocationModal from "./Components/LocationModal";
-import usePushNotification from "./hooks/usePushNotification";
-import useUserLocation from "./hooks/useUserLocation";
-import { getOrCreateUserId } from "@/helpers/user";
-import { useLocationContext } from "@/app/context/locationContext";
-import PrayerCards from "./Components/PrayerCards";
-import UpdateLocationButton from "./Components/UpdateLocationButton";
-import MainNavigation from "./Components/MainNavigation";
-import HomeBanner from "./Components/HomeBanner";
-import RandomVideoSlider from "./Components/Videos/RandomVideoSlider";
-import VideoCard from "./Components/Videos/VideoCard";
+import { useEffect, useState } from 'react';
+import NotificationToggle from '@/app/Components/NotificationToggle';
+import LocationModal from './Components/LocationModal';
+import usePushNotification from './hooks/usePushNotification';
+import useUserLocation from './hooks/useUserLocation';
+import { getOrCreateUserId } from '@/helpers/user';
+import { useLocationContext } from '@/app/context/locationContext';
+import PrayerCards from './Components/PrayerCards';
+import UpdateLocationButton from './Components/UpdateLocationButton';
+import MainNavigation from './Components/MainNavigation';
+import HomeBanner from './Components/HomeBanner';
+import RandomVideoSlider from './Components/Videos/RandomVideoSlider';
+import RandomVideoSliderSkeleton from './Components/Videos/RandomVideoSkeleton';
+import {
+  getCachedRandomVideos,
+  setCachedRandomVideos,
+} from '../lib/videoCache';
 
 export default function Home() {
   // PUSH NOTIFICATION
@@ -33,6 +37,7 @@ export default function Home() {
   // USER LOCATION (browser) → AUTO UPDATE CONTEXT
   const { modalOpen, requestLocation, ignoreLocation } =
     useUserLocation(updateCoords);
+  const [videoLoading, setVideoLoading] = useState(true);
 
   const userId = getOrCreateUserId();
 
@@ -56,9 +61,9 @@ export default function Home() {
 
     (async () => {
       try {
-        const res = await fetch("/api/prayer-times", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
+        const res = await fetch('/api/prayer-times', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
             lat: ctxCoords.lat,
             lon: ctxCoords.lon,
@@ -73,7 +78,7 @@ export default function Home() {
           getLocationName(ctxCoords.lat, ctxCoords.lon);
         }
       } catch (err) {
-        console.error("Failed fetching prayer times", err);
+        console.error('Failed fetching prayer times', err);
       }
     })();
   }, [ctxCoords, userId]);
@@ -85,13 +90,13 @@ export default function Home() {
     if (btnLoading) return;
 
     setBtnLoading(true);
-    setLocationStatus("updating");
+    setLocationStatus('updating');
 
     try {
       await requestLocation(); // ✅ tunggu selesai
-      setLocationStatus("updated");
+      setLocationStatus('updated');
     } catch (err) {
-      setLocationStatus("failed");
+      setLocationStatus('failed');
     } finally {
       setBtnLoading(false); // ✅ INI YANG HILANG SEBELUMNYA
     }
@@ -107,9 +112,40 @@ export default function Home() {
   }, [locationStatus]);
 
   useEffect(() => {
-    fetch("/api/ustadz/random-videos")
-      .then((res) => res.json())
-      .then((data) => setRandomVideos(data.videos || []));
+    // 1️⃣ cek memory cache
+    const memoryCache = getCachedRandomVideos();
+    if (memoryCache) {
+      setRandomVideos(memoryCache);
+      setVideoLoading(false);
+      return;
+    }
+
+    // 2️⃣ cek sessionStorage
+    const sessionCache = sessionStorage.getItem('randomVideos');
+    if (sessionCache) {
+      const parsed = JSON.parse(sessionCache);
+      setCachedRandomVideos(parsed);
+      setRandomVideos(parsed);
+      setVideoLoading(false);
+      return;
+    }
+
+    // 3️⃣ fetch hanya kalau belum ada cache
+    setVideoLoading(true);
+
+    fetch('/api/ustadz/random-videos')
+      .then(res => res.json())
+      .then(data => {
+        const videos = data.videos || [];
+
+        setCachedRandomVideos(videos);
+        sessionStorage.setItem('randomVideos', JSON.stringify(videos));
+
+        setRandomVideos(videos);
+      })
+      .finally(() => {
+        setVideoLoading(false);
+      });
   }, []);
 
   return (
@@ -120,10 +156,10 @@ export default function Home() {
         onIgnore={ignoreLocation}
       />
 
-      <div className="flex min-h-screen flex-col bg-zinc-50 dark:bg-black font-sans">
-        <main className="flex flex-col w-full max-w-3xl mx-auto px-4 pt-16 pb-32 gap-4">
+      <div className='flex min-h-screen flex-col bg-zinc-50 dark:bg-black font-sans'>
+        <main className='flex flex-col w-full max-w-3xl mx-auto px-4 pt-16 pb-32 gap-4'>
           <PrayerCards prayers={prayers} locationName={locationName} />
-          <div className="flex flex-row items-center gap-3 mt-4">
+          <div className='flex flex-row items-center gap-3 mt-4'>
             <UpdateLocationButton
               onUpdate={handleUpdateLocation}
               loading={btnLoading}
@@ -132,14 +168,13 @@ export default function Home() {
             <NotificationToggle isSubscribed={isSubscribed} />
           </div>
           <HomeBanner />
-          {randomVideos.length > 0 && (
-            <>
-              <h2 className="text-base font-semibold mt-6">
-                Kajian Islami Pilihan Hari Ini
-              </h2>
-
+          <h2 className='font-semibold mt-6'>Kajian Islami Pilihan Hari Ini</h2>
+          {videoLoading ? (
+            <RandomVideoSliderSkeleton count={5} />
+          ) : (
+            randomVideos.length > 0 && (
               <RandomVideoSlider videos={randomVideos} />
-            </>
+            )
           )}
         </main>
         <MainNavigation />
