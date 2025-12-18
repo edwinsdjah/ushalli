@@ -11,10 +11,12 @@ import PrayerCards from "./Components/PrayerCards";
 import UpdateLocationButton from "./Components/UpdateLocationButton";
 import MainNavigation from "./Components/MainNavigation";
 import HomeBanner from "./Components/HomeBanner";
+import RandomVideoSlider from "./Components/Videos/RandomVideoSlider";
 
 export default function Home() {
   // PUSH NOTIFICATION
   const { isSubscribed } = usePushNotification();
+  const [randomVideos, setRandomVideos] = useState([]);
 
   // LOCATION + PRAYER CONTEXT
   const {
@@ -103,6 +105,12 @@ export default function Home() {
     return () => clearTimeout(t);
   }, [locationStatus]);
 
+  useEffect(() => {
+    fetch("/api/ustadz/random-videos")
+      .then((res) => res.json())
+      .then((data) => setRandomVideos(data.videos || []));
+  }, []);
+
   return (
     <>
       <LocationModal
@@ -123,6 +131,15 @@ export default function Home() {
             <NotificationToggle isSubscribed={isSubscribed} />
           </div>
           <HomeBanner />
+          {randomVideos.length > 0 && (
+            <>
+              <h2 className="text-base font-semibold mt-6">
+                Kajian Islami Pilihan Hari Ini
+              </h2>
+
+              <RandomVideoSlider videos={randomVideos} />
+            </>
+          )}
         </main>
         <MainNavigation />
       </div>
