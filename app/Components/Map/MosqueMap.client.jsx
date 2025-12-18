@@ -6,6 +6,7 @@ import UserMarker from './UserMarker';
 import MosqueMarkers from './MosqueMarkers';
 import RoutePolyline from './PolyLine';
 import MapController from './MapController';
+import UserFocusController from './UserFocusController';
 const MAPTILER_KEY = process.env.NEXT_PUBLIC_MAPTILER_KEY;
 
 export default function MosqueMapClient({
@@ -41,6 +42,8 @@ export default function MosqueMapClient({
       />
       <RoutePolyline route={route} />
       <MapController route={route} isRouting={isRouting} />
+      <UserFocusController userPos={userPos} />
+
     </MapContainer>
   );
 }

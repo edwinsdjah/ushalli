@@ -2,12 +2,13 @@
 
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { Clock, Compass, Map } from 'lucide-react';
+import { Clock, Compass, Map, Video } from 'lucide-react';
 
 const NAV_ITEMS = [
   { href: '/', label: 'Jadwal', icon: Clock },
   { href: '/compass', label: 'Kompas', icon: Compass },
   { href: '/pathway', label: 'Peta', icon: Map },
+  { href: '/video', label: 'Video', icon: Video }
 ];
 
 export default function MainNavigation({ visible = true }) {
