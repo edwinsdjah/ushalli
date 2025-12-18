@@ -8,7 +8,7 @@ const NAV_ITEMS = [
   { href: '/', label: 'Jadwal', icon: Clock },
   { href: '/compass', label: 'Kompas', icon: Compass },
   { href: '/pathway', label: 'Peta', icon: Map },
-  { href: '/video', label: 'Video', icon: Video }
+  { href: '/videos', label: 'Video', icon: Video }
 ];
 
 export default function MainNavigation({ visible = true }) {
