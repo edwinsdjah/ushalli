@@ -4,43 +4,42 @@ import Subscription from "@/models/Subscription";
 
 export async function POST(req) {
   try {
+    await connect();
     const body = await req.json();
-    console.log("SUB BODY >>>", body);
+    const { userId, endpoint, keys, subscription } = body;
 
-    if (!body || !body.endpoint) {
+    if (!userId)
+      return NextResponse.json({ error: "userId required" }, { status: 400 });
+    if (!subscription)
       return NextResponse.json(
-        { error: "Invalid subscription body" },
+        { error: "subscription required" },
         { status: 400 }
       );
-    }
 
-    await connect();
+    const subEndpoint = endpoint || subscription.endpoint;
+    const subKeys = keys || subscription.keys;
 
-    const { endpoint, keys, userId } = body;
+    if (!subEndpoint)
+      return NextResponse.json({ error: "endpoint required" }, { status: 400 });
 
-    const filter = { endpoint };
-    const update = {
-      $set: {
-        endpoint,
-        keys: keys || {},
-        userId: userId || null,
+    // ✅ Update jika userId sudah ada, else create
+    await Subscription.findOneAndUpdate(
+      { userId },
+      {
+        endpoint: subEndpoint,
+        keys: subKeys,
+        subscription,
         lastSeenAt: new Date(),
       },
-      $setOnInsert: {
-        createdAt: new Date(),
-      },
-    };
-
-    const options = { upsert: true, new: true };
-
-    const doc = await Subscription.findOneAndUpdate(filter, update, options);
-
-    return NextResponse.json(
-      { ok: true, subscription: { endpoint: doc.endpoint } },
-      { status: 201 }
+      { upsert: true }
     );
-  } catch (error) {
-    console.error("subscribe error:", error);
-    return NextResponse.json({ error: "Server error" }, { status: 500 });
+
+    return NextResponse.json({ ok: true });
+  } catch (err) {
+    console.error("subscribe error:", err);
+    return NextResponse.json(
+      { error: "Internal server error" },
+      { status: 500 }
+    );
   }
 }

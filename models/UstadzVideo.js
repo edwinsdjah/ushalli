@@ -7,29 +7,24 @@ const VideoSchema = new mongoose.Schema({
   publishedAt: Date,
 });
 
-const UstadzVideoSchema = new mongoose.Schema(
-  {
-    ustadzSlug: {
-      type: String,
-      required: true,
-      index: true,
-    },
-    date: {
-      type: String, // YYYY-MM-DD
-      required: true,
-      index: true,
-    },
-    videos: [VideoSchema],
-    source: {
-      type: String,
-      default: "youtube",
-    },
+const UstadzVideoSchema = new mongoose.Schema({
+  ustadzSlug: {
+    type: String,
+    unique: true, // 🔑 penting
+    required: true,
   },
-  { timestamps: true }
-);
+  videos: {
+    type: Array,
+    default: [],
+  },
+  lastUpdated: {
+    type: Date,
+    default: Date.now,
+  },
+});
 
 // ⛔ cegah duplikasi cache
-UstadzVideoSchema.index({ ustadzSlug: 1, date: 1 }, { unique: true });
+UstadzVideoSchema.index({ ustadzSlug: 1 }, { unique: true });
 
 export default mongoose.models.UstadzVideo ||
   mongoose.model("UstadzVideo", UstadzVideoSchema);
