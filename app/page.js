@@ -10,6 +10,7 @@ import NotificationToggle from "@/app/Components/NotificationToggle";
 import MainNavigation from "./Components/MainNavigation";
 import HomeBanner from "./Components/HomeBanner";
 import RandomVideoSlider from "./Components/Videos/RandomVideoSlider";
+import RandomVideoSliderSkeleton from "./Components/Videos/RandomVideoSkeleton";
 
 // Hooks & Context
 import useUserLocation from "./hooks/useUserLocation";
@@ -21,6 +22,7 @@ export default function Home() {
   /* =========================
       GLOBAL CONTEXT
      ========================= */
+  const SKELETON_COUNT = 5;
   const userId = getOrCreateUserId();
   const { isSubscribed } = usePush(); // ✅ context push
 
@@ -40,6 +42,7 @@ export default function Home() {
   const [btnLoading, setBtnLoading] = useState(false);
   const [locationStatus, setLocationStatus] = useState(null);
   const [randomVideos, setRandomVideos] = useState([]);
+  const [randomVidLoading, setRandomVidLoading] = useState(true);
 
   /* =========================
       USER LOCATION
@@ -127,18 +130,19 @@ export default function Home() {
       FETCH RANDOM VIDEOS
      ========================= */
   useEffect(() => {
-    let active = true;
-
-    fetch("/api/ustadz/random-videos")
-      .then((res) => res.json())
-      .then((data) => {
-        if (active) setRandomVideos(data?.videos || []);
-      })
-      .catch(console.error);
-
-    return () => {
-      active = false;
+    const fetchRandomVideos = async () => {
+      try {
+        const res = await fetch("/api/ustadz/random-videos");
+        const data = await res.json();
+        setRandomVideos(data?.videos || []);
+      } catch (err) {
+        console.error("Failed fetching random videos", err);
+      } finally {
+        setRandomVidLoading(false);
+      }
     };
+
+    fetchRandomVideos();
   }, []);
 
   /* =========================
@@ -166,14 +170,17 @@ export default function Home() {
           </div>
 
           <HomeBanner />
-
-          {randomVideos.length > 0 && (
+          <h2 className="mt-6 text-black text-base font-semibold">
+            Kajian Islami Pilihan Hari Ini
+          </h2>
+          {randomVidLoading && (
             <>
-              <h2 className="mt-6 text-base font-semibold">
-                Kajian Islami Pilihan Hari Ini
-              </h2>
-              <RandomVideoSlider videos={randomVideos} />
+              <RandomVideoSliderSkeleton />
             </>
+          )}
+
+          {!randomVidLoading && randomVideos.length > 0 && (
+            <RandomVideoSlider videos={randomVideos} />
           )}
         </main>
 

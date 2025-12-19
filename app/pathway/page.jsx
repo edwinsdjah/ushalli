@@ -1,11 +1,11 @@
 'use client';
 
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import TopBar from '@/components/ui/TopBar';
 import { useNearbyMasjids } from '../hooks/useNearbyMasjid';
 import { useRouting } from '../hooks/useRouting';
 import { useLocationContext } from '../context/locationContext';
-import useUserLocation from '../hooks/useUserLocation';
+import { distanceToPolyline } from '@/utils/distance';
 import { useMemo } from 'react';
 import { findClosestRouteIndex, haversineDistance } from '@/utils/distance';
 import MosqueMap from '../Components/Map/MosqueMap';
@@ -15,17 +15,24 @@ import MainNavigation from '../Components/MainNavigation';
 
 export default function Page() {
   // 🔹 ambil context
-  const { coords, address, updateCoords } = useLocationContext();
-
-  // 🔹 hook GPS → update ke context
-  const { modalOpen, loading, requestLocation, ignoreLocation } =
-    useUserLocation(updateCoords);
+  const { coords, address } = useLocationContext();
 
   const [radius, setRadius] = useState(2000);
   const userPos = coords;
   const mosques = useNearbyMasjids(userPos, radius);
   const { route, routeInfo, routeTo, clearRoute } = useRouting(userPos);
   const [selectedMosque, setSelectedMosque] = useState(null);
+  useEffect(() => {
+  if (!route || !routeInfo || !selectedMosque || !userPos) return;
+
+  const OFF_ROUTE_THRESHOLD = 40; // meter
+
+  const distance = distanceToPolyline(route, userPos);
+
+  if (distance > OFF_ROUTE_THRESHOLD) {
+    routeTo(selectedMosque.position, routeInfo.mode);
+  }
+}, [userPos, route, routeInfo, selectedMosque]);
 
   // Function update rute di bottom map
 
@@ -63,8 +70,6 @@ export default function Page() {
 }, [routeInfo, selectedMosque, userPos, trimmedRoute]); // tambahkan trimmedRoute sebagai dependency
 
 
-
-  // Function potong polyline yang sudah dilewati
   
 
   const handleCancel = () => {

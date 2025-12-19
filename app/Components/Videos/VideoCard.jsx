@@ -59,7 +59,7 @@ export default function VideoCard({
       {/* USTADZ */}
       {showUstadz && (
         <p className='text-xs text-zinc-500 dark:text-zinc-400 capitalize'>
-          Ustadz {video.ustadz?.replace('-', ' ')}
+          {video.ustadz?.replace('-', ' ')}
         </p>
       )}
     </div>

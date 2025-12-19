@@ -69,7 +69,7 @@ export default function PrayerCards({ prayers, locationName }) {
         </p>
 
         <p className='text-xs text-gray-500 mt-1'>
-          Lokasi{' '}
+          Lokasi :{' '}
           {isLoading ? (
             <SkeletonBox className='inline-block w-24 h-3 ml-1' />
           ) : (
@@ -113,7 +113,7 @@ export default function PrayerCards({ prayers, locationName }) {
                   <img
                     src={prayerIcons[displayPrayer]}
                     alt={`Icon ${displayPrayer}`}
-                    className='w-20 h-20 md:w-12 md:h-12'
+                    className='w-18 h-18 md:w-12 md:h-12'
                   />
                 )}
         </div>

@@ -64,3 +64,16 @@ export function findClosestRouteIndex(route, userPos) {
 
   return closestIndex;
 }
+
+export function distanceToPolyline(route, userPos) {
+  if (!route || !userPos) return Infinity;
+
+  let min = Infinity;
+
+  for (const [lat, lon] of route) {
+    const d = haversineDistance(userPos, [lat, lon]);
+    if (d < min) min = d;
+  }
+
+  return min; // meter
+}

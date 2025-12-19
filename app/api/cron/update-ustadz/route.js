@@ -17,7 +17,7 @@ export async function GET() {
         await UstadzVideo.findOneAndUpdate(
           { ustadzSlug: ustadz.slug },
           {
-            $set: { videos, lastUpdated: new Date() },
+            $set: { name: ustadz.name, videos, lastUpdated: new Date() },
             $setOnInsert: { ustadzSlug: ustadz.slug },
           },
           { upsert: true }

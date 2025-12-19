@@ -28,7 +28,6 @@ export function LocationProvider({ children }) {
       
       const data = await res.json();
       const result = data.data
-      console.log(result)
       const city =
         result.address.suburb ||
         result.address.town ||
