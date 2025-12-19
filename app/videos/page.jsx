@@ -1,14 +1,16 @@
-"use client";
+'use client';
 
-import React, { useState, useEffect } from "react";
-import MainNavigation from "../Components/MainNavigation";
-import VideoAvatar from "../Components/Videos/VideoAvatar";
-import LoadingSpinner from "../Components/LoadingSpinner";
-import VideoCard from "../Components/Videos/VideoCard";
+import React, { useState, useEffect } from 'react';
+import MainNavigation from '../Components/MainNavigation';
+import VideoAvatar from '../Components/Videos/VideoAvatar';
+import VideoCard from '../Components/Videos/VideoCard';
+import VideoCardSkeleton from '../Components/Videos/VideoCardSkeleton';
+
+const SKELETON_COUNT = 5;
 
 const UstadzPage = () => {
   const [videos, setVideos] = useState([]);
-  const [loading, setLoading] = useState(false);
+  const [loading, setLoading] = useState(true);
   const [activeVideoId, setActiveVideoId] = useState(null);
 
   async function loadVideos(slug) {
@@ -20,42 +22,36 @@ const UstadzPage = () => {
       const data = await res.json();
       setVideos(data.videos || []);
     } catch (err) {
-      console.error("Gagal fetch video", err);
+      console.error('Gagal fetch video', err);
     } finally {
       setLoading(false);
     }
   }
 
   useEffect(() => {
-    loadVideos("adi-hidayat");
+    loadVideos('adi-hidayat');
   }, []);
 
   return (
-    <div className="p-4 space-y-4 mt-15 mb-15 relative">
+    <div className='flex min-h-screen flex-col py-15 mb-15 px-4 bg-zinc-50 dark:bg-black font-sans'>
+      {/* === PILIH USTADZ === */}
       <VideoAvatar loadVideos={loadVideos} />
 
-      {/* VIDEO LIST */}
-      <div
-        className={`space-y-5 transition
-          ${loading ? "blur-sm pointer-events-none" : ""}
-        `}
-      >
-        {videos.map(video => (
-          <VideoCard
-            key={video.videoId}
-            video={video}
-            isActive={activeVideoId === video.videoId}
-            onPlay={() => setActiveVideoId(video.videoId)}
-          />
-        ))}
+      {/* === VIDEO LIST / SKELETON === */}
+      <div className='space-y-5'>
+        {loading
+          ? Array.from({ length: SKELETON_COUNT }).map((_, i) => (
+              <VideoCardSkeleton key={i} />
+            ))
+          : videos.map(video => (
+              <VideoCard
+                key={video.videoId}
+                video={video}
+                isActive={activeVideoId === video.videoId}
+                onPlay={() => setActiveVideoId(video.videoId)}
+              />
+            ))}
       </div>
-
-      {/* LOADING OVERLAY */}
-      {loading && (
-        <div className="absolute inset-0 z-50 flex items-center justify-center bg-black/30 backdrop-blur-sm">
-          <LoadingSpinner />
-        </div>
-      )}
 
       <MainNavigation />
     </div>
