@@ -7,7 +7,7 @@ export async function POST(req) {
     await connect();
     const body = await req.json();
     const { userId, endpoint, keys, subscription } = body;
-
+    console.log(body);
     if (!userId)
       return NextResponse.json({ error: "userId required" }, { status: 400 });
     if (!subscription)
