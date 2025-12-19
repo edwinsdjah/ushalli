@@ -96,11 +96,17 @@ export default function usePushNotification() {
       });
 
       // ✅ Pastikan fallback jika keys atau endpoint kosong
+      const encodeKey = (key) =>
+        key ? btoa(String.fromCharCode(...new Uint8Array(key))) : null;
+
       const subPayload = {
         userId,
-        endpoint: subscription.endpoint || "",
-        keys: subscription.keys || {},
-        subscription: subscription.toJSON(),
+        endpoint: subscription.endpoint,
+        keys: {
+          p256dh: encodeKey(subscription.getKey("p256dh")),
+          auth: encodeKey(subscription.getKey("auth")),
+        },
+        subscription: subscription.toJSON(), // tetap simpan full object
       };
 
       if (!subPayload.userId) throw new Error("userId is missing");
