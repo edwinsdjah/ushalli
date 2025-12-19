@@ -36,7 +36,7 @@ export async function POST(req) {
       try {
         const subsObj = {
           endpoint: s.endpoint,
-          keys: s.keys || {},
+          keys: s.subscription.keys || {},
         };
 
         const r = await sendPush(
