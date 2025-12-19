@@ -11,18 +11,18 @@ import MainNavigation from "./Components/MainNavigation";
 import HomeBanner from "./Components/HomeBanner";
 import RandomVideoSlider from "./Components/Videos/RandomVideoSlider";
 
-// Hooks & Helpers
-import usePushNotification from "./hooks/usePushNotification";
+// Hooks & Context
 import useUserLocation from "./hooks/useUserLocation";
 import { useLocationContext } from "@/app/context/locationContext";
+import { usePush } from "./context/pushContext";
 import { getOrCreateUserId } from "@/helpers/user";
 
 export default function Home() {
   /* =========================
-      GLOBAL & CONTEXT STATE
+      GLOBAL CONTEXT
      ========================= */
   const userId = getOrCreateUserId();
-  const { isSubscribed } = usePushNotification();
+  const { isSubscribed } = usePush(); // ✅ context push
 
   const {
     coords,
@@ -42,23 +42,23 @@ export default function Home() {
   const [randomVideos, setRandomVideos] = useState([]);
 
   /* =========================
-      USER LOCATION (BROWSER)
+      USER LOCATION
      ========================= */
   const { modalOpen, requestLocation, ignoreLocation } =
     useUserLocation(updateCoords);
 
   /* =========================
-      FETCH PRAYER TIMES (CACHED)
+      FETCH PRAYER TIMES
      ========================= */
   useEffect(() => {
     if (!coords || !userId) return;
 
-    const isSameLocation =
+    const sameLocation =
       lastPrayerCoords &&
       lastPrayerCoords.lat === coords.lat &&
       lastPrayerCoords.lon === coords.lon;
 
-    if (prayers && isSameLocation) return;
+    if (prayers && sameLocation) return;
 
     const fetchPrayerTimes = async () => {
       try {
@@ -119,12 +119,8 @@ export default function Home() {
      ========================= */
   useEffect(() => {
     if (!locationStatus) return;
-
-    const timer = setTimeout(() => {
-      setLocationStatus(null);
-    }, 3000);
-
-    return () => clearTimeout(timer);
+    const t = setTimeout(() => setLocationStatus(null), 3000);
+    return () => clearTimeout(t);
   }, [locationStatus]);
 
   /* =========================
@@ -136,9 +132,7 @@ export default function Home() {
     fetch("/api/ustadz/random-videos")
       .then((res) => res.json())
       .then((data) => {
-        if (active) {
-          setRandomVideos(data?.videos || []);
-        }
+        if (active) setRandomVideos(data?.videos || []);
       })
       .catch(console.error);
 
@@ -168,7 +162,7 @@ export default function Home() {
               loading={btnLoading}
               locationStatus={locationStatus}
             />
-            <NotificationToggle isSubscribed={isSubscribed} />
+            <NotificationToggle /> {/* ✅ ambil dari context */}
           </div>
 
           <HomeBanner />

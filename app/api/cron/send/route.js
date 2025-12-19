@@ -79,7 +79,7 @@ export async function POST(req) {
             subs.map(async (s) => {
               try {
                 const r = await sendPush(
-                  { endpoint: s.endpoint, keys: s.subscription.keys || {} },
+                  { endpoint: s.endpoint, keys: s.keys || {} },
                   JSON.stringify(payloadObj)
                 );
 
