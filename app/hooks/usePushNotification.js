@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useState, useEffect } from "react";
+import { useCallback, useEffect, useState } from "react";
 
 function getOrCreateUserId() {
   if (typeof window === "undefined") return null;
@@ -19,7 +19,26 @@ export default function usePushNotification() {
   const [loading, setLoading] = useState(false);
   const [isSubscribed, setIsSubscribed] = useState(false);
 
-  // Jalankan hanya di client
+  const userId = typeof window !== "undefined" ? getOrCreateUserId() : null;
+
+  /**
+   * 🔍 Cek status subscription dari DB
+   */
+  const checkSubscriptionStatus = useCallback(async () => {
+    if (!userId) return;
+
+    try {
+      const res = await fetch(`/api/push/status?userId=${userId}`);
+      const data = await res.json();
+      setIsSubscribed(!!data.subscribed);
+    } catch {
+      setIsSubscribed(false);
+    }
+  }, [userId]);
+
+  /**
+   * Init
+   */
   useEffect(() => {
     const supported =
       typeof window !== "undefined" &&
@@ -27,28 +46,29 @@ export default function usePushNotification() {
       "PushManager" in window;
 
     setIsSupported(supported);
+    if (!supported) return;
 
-    if (supported) {
-      setPermission(Notification.permission);
+    setPermission(Notification.permission);
+    checkSubscriptionStatus();
+  }, [checkSubscriptionStatus]);
 
-      navigator.serviceWorker.ready.then(async (sw) => {
-        const sub = await sw.pushManager.getSubscription();
-        setIsSubscribed(!!sub);
-      });
-    }
-  }, []);
-
+  /**
+   * Permission
+   */
   const requestPermission = useCallback(async () => {
-    if (!isSupported) return { ok: false, error: "Not supported" };
+    if (!isSupported) return { ok: false };
 
     const result = await Notification.requestPermission();
     setPermission(result);
 
     return result === "granted"
       ? { ok: true }
-      : { ok: false, error: "Permission not granted" };
+      : { ok: false, error: "Permission denied" };
   }, [isSupported]);
 
+  /**
+   * Subscribe
+   */
   const subscribeToPush = useCallback(async () => {
     try {
       setLoading(true);
@@ -75,38 +95,52 @@ export default function usePushNotification() {
         applicationServerKey: b64ToUint8(publicKey),
       });
 
-      const userId = getOrCreateUserId();
+      // ✅ Pastikan fallback jika keys atau endpoint kosong
+      const subPayload = {
+        userId,
+        endpoint: subscription.endpoint || "",
+        keys: subscription.keys || {},
+        subscription: subscription.toJSON(),
+      };
 
-      // setelah sukses simpan subscription ke server
+      if (!subPayload.userId) throw new Error("userId is missing");
+      if (!subPayload.endpoint)
+        throw new Error("subscription endpoint missing");
+
       await fetch("/api/push/subscribe", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ ...subscription.toJSON(), userId }),
+        body: JSON.stringify(subPayload),
       });
 
-      // 🔥 Ambil lokasi user dari localStorage
+      // 🔥 Regenerate prayer times
       const savedCoords = localStorage.getItem("user_coords");
       if (savedCoords) {
         const { lat, lon } = JSON.parse(savedCoords);
-
-        // 🔥 Regenerate PrayerTimes setelah subscribe
         await fetch("/api/prayer-times", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ lat, lon, userId }),
+          body: JSON.stringify({
+            lat,
+            lon,
+            userId,
+            persist: true, // ✅ FIXED: subscribe = simpan ke DB
+          }),
         });
       }
 
       setIsSubscribed(true);
-
       return { ok: true };
     } catch (err) {
       return { ok: false, error: err.message };
     } finally {
       setLoading(false);
     }
-  }, [permission, requestPermission]);
+  }, [permission, requestPermission, userId]);
 
+  /**
+   * Unsubscribe + cleanup DB
+   */
   const unsubscribeFromPush = useCallback(async () => {
     try {
       setLoading(true);
@@ -114,14 +148,13 @@ export default function usePushNotification() {
       const sw = await navigator.serviceWorker.ready;
       const sub = await sw.pushManager.getSubscription();
 
-      if (sub) {
-        await sub.unsubscribe();
-        await fetch("/api/push/unsubscribe", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify(sub),
-        });
-      }
+      if (sub) await sub.unsubscribe();
+
+      await fetch("/api/push/unsubscribe", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ userId }),
+      });
 
       setIsSubscribed(false);
       return { ok: true };
@@ -130,7 +163,7 @@ export default function usePushNotification() {
     } finally {
       setLoading(false);
     }
-  }, []);
+  }, [userId]);
 
   return {
     permission,

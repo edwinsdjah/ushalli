@@ -5,35 +5,35 @@ import { USTADZ_LIST } from "@/data/ustadz";
 import { fetchLatestVideosByChannel } from "@/lib/youtube";
 
 export async function GET() {
-  await connect();
+  try {
+    await connect();
 
-  const today = new Date().toISOString().slice(0, 10);
-  const result = [];
+    const result = [];
 
-  for (const ustadz of USTADZ_LIST) {
-    const videos = await fetchLatestVideosByChannel(ustadz.channelId);
+    await Promise.all(
+      USTADZ_LIST.map(async (ustadz) => {
+        const videos = await fetchLatestVideosByChannel(ustadz.channelId);
 
-    await UstadzVideo.findOneAndUpdate(
-      {
-        ustadzSlug: ustadz.slug,
-        date: today,
-      },
-      {
-        ustadzSlug: ustadz.slug,
-        date: today,
-        videos,
-      },
-      {
-        upsert: true,
-        new: true,
-      }
+        await UstadzVideo.findOneAndUpdate(
+          { ustadzSlug: ustadz.slug },
+          {
+            $set: { videos, lastUpdated: new Date() },
+            $setOnInsert: { ustadzSlug: ustadz.slug },
+          },
+          { upsert: true }
+        );
+      })
     );
 
-    result.push(ustadz.slug);
+    return NextResponse.json({
+      status: "ok",
+      updated: result,
+    });
+  } catch (err) {
+    console.error("Update video error:", err);
+    return NextResponse.json(
+      { error: "Internal server error" },
+      { status: 500 }
+    );
   }
-
-  return NextResponse.json({
-    status: "ok",
-    updated: result,
-  });
 }

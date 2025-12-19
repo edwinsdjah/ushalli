@@ -13,6 +13,10 @@ const SubscriptionSchema = new mongoose.Schema(
     },
     // optional: associate with user later
     userId: { type: String, default: null },
+    subscription: {
+      type: Object,
+      required: true,
+    },
     createdAt: { type: Date, default: () => new Date() },
     lastSeenAt: { type: Date, default: () => new Date() }, // update tiap ping
   },

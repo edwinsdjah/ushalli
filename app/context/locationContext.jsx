@@ -21,21 +21,24 @@ export function LocationProvider({ children }) {
   const getLocationName = useCallback(async (lat, lon) => {
     try {
       const res = await fetch(
-        `https://nominatim.openstreetmap.org/reverse?lat=${lat}&lon=${lon}&format=json`
+        `/api/reverse-geocode?lat=${lat}&lon=${lon}`
       );
+
       if (!res.ok) throw new Error();
       
       const data = await res.json();
+      const result = data.data
+      console.log(result)
       const city =
-        data.address.suburb ||
-        data.address.town ||
-        data.address.village ||
-        data.address.county ||
-        data.address.state ||
-        data.address.city;
-      setNeighborhood(data.address.neighbourhood)
-      setRegion(data.address.city)
-      setAddress(data.display_name || null);
+        result.address.suburb ||
+        result.address.town ||
+        result.address.village ||
+        result.address.county ||
+        result.address.state ||
+        result.address.city;
+      setNeighborhood(result.address.neighbourhood)
+      setRegion(result.address.city)
+      setAddress(result.display_name || null);
       setLocationName(city || '');
       return city;
     } catch (e) {
