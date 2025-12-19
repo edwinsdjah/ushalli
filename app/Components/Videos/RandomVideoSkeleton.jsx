@@ -5,7 +5,7 @@ import VideoCardSkeleton from './VideoCardSkeleton';
 export default function RandomVideoSliderSkeleton({ count = 5 }) {
   return (
     <section className='relative '>
-      <div className='flex gap-4 overflow-x-hidden pr-16'>
+      <div className='flex flex-row gap-4 overflow-x-hidden pr-16'>
         {Array.from({ length: count }).map((_, index) => (
           <div
             key={index}

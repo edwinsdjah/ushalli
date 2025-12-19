@@ -29,4 +29,10 @@ export const USTADZ_LIST = [
     channelId: "UCOO6NvLCJxdDi36SWF1dVXA",
     avatar: "/avatar/felix.jpg",
   },
+  {
+    slug: "salim",
+    name: "Ustadz Salim A. Fillah",
+    channelId: "UCK_euJKpQQzxHkoI3l6PbAQ",
+    avatar: "/avatar/salim.jfif",
+  },
 ];

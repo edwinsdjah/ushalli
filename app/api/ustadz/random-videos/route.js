@@ -18,7 +18,7 @@ export async function GET() {
       title: v.title,
       thumbnail: v.thumbnail,
       publishedAt: v.publishedAt,
-      ustadz: doc.ustadzSlug,
+      ustadz: doc.name,
     }))
   );
 

@@ -13,6 +13,9 @@ const UstadzVideoSchema = new mongoose.Schema({
     unique: true, // 🔑 penting
     required: true,
   },
+  name: {
+    type: String,
+  },
   videos: {
     type: Array,
     default: [],

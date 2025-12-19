@@ -43,7 +43,6 @@ export default function MosqueMapClient({
       <RoutePolyline route={route} />
       <MapController route={route} isRouting={isRouting} />
       <UserFocusController userPos={userPos} />
-
     </MapContainer>
   );
 }
