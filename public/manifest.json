@@ -23,28 +23,5 @@
       "type": "image/png",
       "purpose": "maskable"
     }
-  ],
-  "openGraph": {
-    "title": "Ushalli",
-    "description": "Teman Ibadah dimana saja",
-    "url": "https://ushalli.vercel.app",
-    "siteName": "Ushalli",
-    "images": [
-      {
-        "url": "/og-image.png",
-        "width": 512,
-        "height": 512,
-        "alt": "Ushalli - Teman Ibadah dimana saja"
-      }
-    ],
-    "locale": "id_ID",
-    "type": "website"
-  },
-
-  "twitter": {
-    "card": "summary_large_image",
-    "title": "Ushalli",
-    "description": "Teman Ibadah dimana saja",
-    "images": ["/og-image.png"]
-  }
+  ]
 }
