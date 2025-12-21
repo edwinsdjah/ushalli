@@ -7,9 +7,10 @@ export default function VideoCard({
   isActive = false,
   onPlay,
   showUstadz = false,
+  type,
 }) {
   return (
-    <div className='space-y-2'>
+    <div className={type === 'grid' ? 'md:w-[23.5%] space-y-2' : 'space-y-2'}>
       {/* VIDEO */}
       <div className='relative aspect-video rounded-2xl overflow-hidden bg-black group'>
         {isActive ? (
