@@ -15,18 +15,6 @@ const geistMono = Geist_Mono({
   subsets: ['latin'],
 });
 
-export const metadata = {
-  title: 'Ushalli',
-  description: 'Teman Ibadah dimana saja',
-  manifest: '/manifest.json',
-  themeColor: '#ffffff',
-  appleWebApp: {
-    capable: true,
-    statusBarStyle: 'black-translucent',
-    title: 'Ushalli',
-  },
-};
-
 export default function RootLayout({ children }) {
   return (
     <html lang='en'>
