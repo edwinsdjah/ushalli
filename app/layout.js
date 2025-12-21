@@ -33,6 +33,17 @@ export default function RootLayout({ children }) {
           sizes='32x32'
           href='/icons/icon-32.png'
         />
+        <meta property='og:url' content='https://ushalli.vercel.app/' />
+        <meta property='og:type' content='website' />
+        <meta property='og:title' content='Ushalli' />
+        <meta property='og:description' content='Teman Ibadah dimana saja' />
+        <meta property='og:image' content='/og-image.png' />
+        <meta name='twitter:card' content='summary_large_image' />
+        <meta property='twitter:domain' content='ushalli.vercel.app' />
+        <meta property='twitter:url' content='https://ushalli.vercel.app/' />
+        <meta name='twitter:title' content='Ushalli' />
+        <meta name='twitter:description' content='Teman Ibadah dimana saja' />
+        <meta name='twitter:image' content='/og-image.png' />
       </head>
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased pwa-body`}
