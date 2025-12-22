@@ -21,7 +21,7 @@ export default function RandomVideoSlider({ videos }) {
           <div
             key={video.videoId}
             className={`
-              min-w-[85vw] snap-start
+              min-w-[85vw] md:min-w-[50%] snap-start
               ${index === 0 ? 'ml-4' : ''}
             `}
           >

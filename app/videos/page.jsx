@@ -38,7 +38,7 @@ const UstadzPage = () => {
       <VideoAvatar loadVideos={loadVideos} />
 
       {/* === VIDEO LIST / SKELETON === */}
-      <div className='space-y-5'>
+      <div className='space-y-5 md:flex md:flex-row gap-3 md:flex-wrap'>
         {loading
           ? Array.from({ length: SKELETON_COUNT }).map((_, i) => (
               <VideoCardSkeleton key={i} />
@@ -49,6 +49,7 @@ const UstadzPage = () => {
                 video={video}
                 isActive={activeVideoId === video.videoId}
                 onPlay={() => setActiveVideoId(video.videoId)}
+                type='grid'
               />
             ))}
       </div>
