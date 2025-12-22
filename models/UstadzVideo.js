@@ -10,14 +10,12 @@ const VideoSchema = new mongoose.Schema({
 const UstadzVideoSchema = new mongoose.Schema({
   ustadzSlug: {
     type: String,
-    unique: true, // 🔑 penting
+    unique: true,
     required: true,
   },
-  name: {
-    type: String,
-  },
+  name: String,
   videos: {
-    type: Array,
+    type: [VideoSchema], // 🔥 penting
     default: [],
   },
   lastUpdated: {
@@ -25,9 +23,6 @@ const UstadzVideoSchema = new mongoose.Schema({
     default: Date.now,
   },
 });
-
-// ⛔ cegah duplikasi cache
-UstadzVideoSchema.index({ ustadzSlug: 1 }, { unique: true });
 
 export default mongoose.models.UstadzVideo ||
   mongoose.model("UstadzVideo", UstadzVideoSchema);
