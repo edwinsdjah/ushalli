@@ -17,10 +17,19 @@ export async function GET() {
         await UstadzVideo.findOneAndUpdate(
           { ustadzSlug: ustadz.slug },
           {
-            $set: { name: ustadz.name, videos, lastUpdated: new Date() },
-            $setOnInsert: { ustadzSlug: ustadz.slug },
+            $set: {
+              name: ustadz.name,
+              videos: videos.slice(0, 5), // 🔒 replace total
+              lastUpdated: new Date(),
+            },
+            $setOnInsert: {
+              ustadzSlug: ustadz.slug,
+            },
           },
-          { upsert: true }
+          {
+            upsert: true,
+            new: true,
+          }
         );
       })
     );
