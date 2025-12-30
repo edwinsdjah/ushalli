@@ -1,18 +1,18 @@
-import PrayerTimes from "@/models/PrayerTimes";
-import { DateTime } from "luxon";
+import PrayerTimes from '@/models/PrayerTimes';
+import { DateTime } from 'luxon';
 
 export async function regeneratePrayerTimesForUser(user) {
   const { location, userId } = user;
   const lat = location.lat;
   const lon = location.lon;
 
-  const api = `https://api.aladhan.com/v1/timings?latitude=${lat}&longitude=${lon}&method=2`;
+  const api = `https://api.aladhan.com/v1/timings?latitude=${lat}&longitude=${lon}&method=11`;
   const response = await fetch(api);
   const json = await response.json();
   if (!json?.data?.timings) return null;
 
   const t = json.data.timings;
-  const clean = (str) => str?.match(/\d{1,2}:\d{1,2}/)?.[0] || null;
+  const clean = str => str?.match(/\d{1,2}:\d{1,2}/)?.[0] || null;
 
   // Simpan semua, termasuk sunrise
   const cleanTimings = {
@@ -24,18 +24,18 @@ export async function regeneratePrayerTimesForUser(user) {
     isha: clean(t.Isha),
   };
 
-  const [day, month, year] = json.data.date.gregorian.date.split("-");
+  const [day, month, year] = json.data.date.gregorian.date.split('-');
   const tz = json.data.meta.timezone;
 
-  const convertToEpoch = (hhmm) =>
+  const convertToEpoch = hhmm =>
     hhmm
       ? DateTime.fromObject(
           {
             year: Number(year),
             month: Number(month),
             day: Number(day),
-            hour: Number(hhmm.split(":")[0]),
-            minute: Number(hhmm.split(":")[1]),
+            hour: Number(hhmm.split(':')[0]),
+            minute: Number(hhmm.split(':')[1]),
           },
           { zone: tz }
         ).toMillis()
@@ -44,7 +44,7 @@ export async function regeneratePrayerTimesForUser(user) {
   // Hanya buat epoch untuk yang perlu push notif, tidak termasuk sunrise
   const timingsEpoch = Object.fromEntries(
     Object.entries(cleanTimings)
-      .filter(([key]) => key !== "sunrise")
+      .filter(([key]) => key !== 'sunrise')
       .map(([key, val]) => [key, convertToEpoch(val)])
   );
 
@@ -59,7 +59,7 @@ export async function regeneratePrayerTimesForUser(user) {
         timings: cleanTimings,
         timingsEpoch,
         updatedAt: new Date(),
-        source: "aladhan",
+        source: 'aladhan',
         notificationsSent: {
           fajr: false,
           dhuhr: false,
