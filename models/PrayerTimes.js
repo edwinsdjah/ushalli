@@ -1,4 +1,4 @@
-import mongoose from "mongoose";
+import mongoose from 'mongoose';
 
 const PrayerTimesSchedule = new mongoose.Schema(
   {
@@ -11,6 +11,7 @@ const PrayerTimesSchedule = new mongoose.Schema(
       name: String,
     },
     timings: {
+      imsak: String,
       fajr: String,
       dhuhr: String,
       asr: String,
@@ -19,6 +20,7 @@ const PrayerTimesSchedule = new mongoose.Schema(
       sunrise: String,
     },
     timingsEpoch: {
+      imsak: Number,
       fajr: Number,
       dhuhr: Number,
       asr: Number,
@@ -26,6 +28,7 @@ const PrayerTimesSchedule = new mongoose.Schema(
       isha: Number,
     },
     notificationsSent: {
+      imsak: { type: Boolean, default: false },
       fajr: { type: Boolean, default: false },
       dhuhr: { type: Boolean, default: false },
       asr: { type: Boolean, default: false },
@@ -41,4 +44,4 @@ const PrayerTimesSchedule = new mongoose.Schema(
 );
 
 export default mongoose.models.PrayerTimes ||
-  mongoose.model("PrayerTimes", PrayerTimesSchedule);
+  mongoose.model('PrayerTimes', PrayerTimesSchedule);
