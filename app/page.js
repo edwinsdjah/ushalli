@@ -1,22 +1,22 @@
-"use client";
+'use client';
 
-import { useEffect, useState } from "react";
+import { useEffect, useState } from 'react';
 
 // Components
-import LocationModal from "./Components/LocationModal";
-import PrayerCards from "./Components/PrayerCards";
-import UpdateLocationButton from "./Components/UpdateLocationButton";
-import NotificationToggle from "@/app/Components/NotificationToggle";
-import MainNavigation from "./Components/MainNavigation";
-import HomeBanner from "./Components/HomeBanner";
-import RandomVideoSlider from "./Components/Videos/RandomVideoSlider";
-import RandomVideoSliderSkeleton from "./Components/Videos/RandomVideoSkeleton";
+import LocationModal from './Components/LocationModal';
+import PrayerCards from './Components/PrayerCards';
+import UpdateLocationButton from './Components/UpdateLocationButton';
+import NotificationToggle from '@/app/Components/NotificationToggle';
+import MainNavigation from './Components/MainNavigation';
+import DailyDoa from './Components/DailyDoa';
+import RandomVideoSlider from './Components/Videos/RandomVideoSlider';
+import RandomVideoSliderSkeleton from './Components/Videos/RandomVideoSkeleton';
 
 // Hooks & Context
-import useUserLocation from "./hooks/useUserLocation";
-import { useLocationContext } from "@/app/context/locationContext";
-import { usePush } from "./context/pushContext";
-import { getOrCreateUserId } from "@/helpers/user";
+import useUserLocation from './hooks/useUserLocation';
+import { useLocationContext } from '@/app/context/locationContext';
+import { usePush } from './context/pushContext';
+import { getOrCreateUserId } from '@/helpers/user';
 
 export default function Home() {
   /* =========================
@@ -65,9 +65,9 @@ export default function Home() {
 
     const fetchPrayerTimes = async () => {
       try {
-        const res = await fetch("/api/prayer-times", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
+        const res = await fetch('/api/prayer-times', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
             lat: coords.lat,
             lon: coords.lon,
@@ -83,7 +83,7 @@ export default function Home() {
           getLocationName(coords.lat, coords.lon);
         }
       } catch (err) {
-        console.error("Failed fetching prayer times", err);
+        console.error('Failed fetching prayer times', err);
       }
     };
 
@@ -105,13 +105,13 @@ export default function Home() {
     if (btnLoading) return;
 
     setBtnLoading(true);
-    setLocationStatus("updating");
+    setLocationStatus('updating');
 
     try {
       await requestLocation();
-      setLocationStatus("updated");
+      setLocationStatus('updated');
     } catch {
-      setLocationStatus("failed");
+      setLocationStatus('failed');
     } finally {
       setBtnLoading(false);
     }
@@ -132,11 +132,11 @@ export default function Home() {
   useEffect(() => {
     const fetchRandomVideos = async () => {
       try {
-        const res = await fetch("/api/ustadz/random-videos");
+        const res = await fetch('/api/ustadz/random-videos');
         const data = await res.json();
         setRandomVideos(data?.videos || []);
       } catch (err) {
-        console.error("Failed fetching random videos", err);
+        console.error('Failed fetching random videos', err);
       } finally {
         setRandomVidLoading(false);
       }
@@ -156,11 +156,11 @@ export default function Home() {
         onIgnore={ignoreLocation}
       />
 
-      <div className="flex min-h-screen flex-col bg-zinc-50 dark:bg-black font-sans">
-        <main className="flex w-full max-w-3xl mx-auto flex-col gap-4 px-4 pt-16 pb-32">
+      <div className='flex min-h-screen flex-col bg-zinc-50 dark:bg-black font-sans'>
+        <main className='flex w-full max-w-3xl mx-auto flex-col gap-4 px-4 pt-16 pb-32'>
           <PrayerCards prayers={prayers} locationName={locationName} />
 
-          <div className="flex items-center gap-3 mt-4">
+          <div className='flex items-center gap-3 mt-4'>
             <UpdateLocationButton
               onUpdate={handleUpdateLocation}
               loading={btnLoading}
@@ -169,8 +169,9 @@ export default function Home() {
             <NotificationToggle /> {/* ✅ ambil dari context */}
           </div>
 
-          <HomeBanner />
-          <h2 className="mt-6 text-black text-base font-semibold">
+          <DailyDoa />
+
+          <h2 className='mt-6 text-black text-base font-semibold'>
             Kajian Islami Pilihan Hari Ini
           </h2>
           {randomVidLoading && (

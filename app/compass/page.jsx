@@ -46,22 +46,47 @@ export default function CompassPage() {
   useEffect(() => {
     if (!permissionGranted) return;
 
-    const handler = e => {
-      let d = null;
+    const handleOrientation = e => {
+      let compassHeading = null;
 
+      // iOS devices
       if (typeof e.webkitCompassHeading === 'number') {
-        d = e.webkitCompassHeading;
-      } else if (typeof e.alpha === 'number') {
-        d = 360 - e.alpha;
+        compassHeading = e.webkitCompassHeading;
+      }
+      // Android / Non-iOS (Absolute orientation)
+      else if (e.absolute && typeof e.alpha === 'number') {
+        compassHeading = 360 - e.alpha;
       }
 
-      if (d !== null) {
-        setHeading((d + 360) % 360);
+      if (compassHeading !== null) {
+        setHeading(compassHeading);
       }
     };
 
-    window.addEventListener('deviceorientation', handler, true);
-    return () => window.removeEventListener('deviceorientation', handler);
+    // Listen for absolute orientation on Android
+    const handleAbsoluteOrientation = e => {
+      if (e.absolute && typeof e.alpha === 'number') {
+        setHeading(360 - e.alpha);
+      }
+    };
+
+    if ('ondeviceorientationabsolute' in window) {
+      window.addEventListener(
+        'deviceorientationabsolute',
+        handleAbsoluteOrientation,
+        true
+      );
+    } else {
+      window.addEventListener('deviceorientation', handleOrientation, true);
+    }
+
+    return () => {
+      window.removeEventListener(
+        'deviceorientationabsolute',
+        handleAbsoluteOrientation
+      );
+      window.removeEventListener('deviceorientation', handleOrientation);
+    };
   }, [permissionGranted]);
 
   const requestPermission = async () => {
@@ -91,7 +116,9 @@ export default function CompassPage() {
           {loading ? (
             <Loader2 className='animate-spin text-purple-600' />
           ) : !coords ? (
-            <p className='text-center text-sm text-gray-600'>Lokasi belum tersedia.</p>
+            <p className='text-center text-sm text-gray-600'>
+              Lokasi belum tersedia.
+            </p>
           ) : (
             <>
               {/* Kompas */}
@@ -99,10 +126,18 @@ export default function CompassPage() {
                 {/* Lingkaran kompas abu-abu modern */}
                 <div className='absolute inset-0 rounded-full bg-gray-100 border-gray-300 flex items-center justify-center'>
                   {/* Arah N, E, S, W */}
-                  <span className='absolute top-2 text-gray-500 font-medium'>N</span>
-                  <span className='absolute right-2 text-gray-500 font-medium'>E</span>
-                  <span className='absolute bottom-2 text-gray-500 font-medium'>S</span>
-                  <span className='absolute left-2 text-gray-500 font-medium'>W</span>
+                  <span className='absolute top-2 text-gray-500 font-medium'>
+                    N
+                  </span>
+                  <span className='absolute right-2 text-gray-500 font-medium'>
+                    E
+                  </span>
+                  <span className='absolute bottom-2 text-gray-500 font-medium'>
+                    S
+                  </span>
+                  <span className='absolute left-2 text-gray-500 font-medium'>
+                    W
+                  </span>
                 </div>
 
                 {/* Jarum Kiblat modern */}

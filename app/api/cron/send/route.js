@@ -62,7 +62,10 @@ export async function POST(req) {
           const localName = PRAYER_NAME_MAP[prayerName] || prayerName;
 
           const payloadObj = {
-            title: `Waktu Sholat ${localName}`,
+            title:
+              localName === 'Imsak'
+                ? `Pengingat Waktu Imsak`
+                : `Waktu Sholat ${localName}`,
             body: `Sudah masuk waktu ${localName}.`,
             url: '/',
             tag: `prayer-${prayerName}-${pt.date}`,

@@ -68,8 +68,8 @@ export default function RamadhanPage() {
         // Fetch Gregorian Calendar for Feb & March 2026
         // Ramadhan starts 19 Feb 2026 (Government confirmed)
         // Tune is not needed since we use Gregorian dates and just map Ramadhan days
-        const febUrl = `https://api.aladhan.com/v1/calendar/2026/2?latitude=${lat}&longitude=${lon}&method=20`;
-        const marUrl = `https://api.aladhan.com/v1/calendar/2026/3?latitude=${lat}&longitude=${lon}&method=20`;
+        const febUrl = `https://api.aladhan.com/v1/calendar/2026/2?latitude=${lat}&longitude=${lon}&method=20&tune=0,1,0,2,3,2,0,2,0`;
+        const marUrl = `https://api.aladhan.com/v1/calendar/2026/3?latitude=${lat}&longitude=${lon}&method=20&tune=0,1,0,2,3,2,0,2,0`;
 
         const [febRes, marRes] = await Promise.all([
           fetch(febUrl),
