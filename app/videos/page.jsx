@@ -33,7 +33,7 @@ const UstadzPage = () => {
   }, []);
 
   return (
-    <div className='flex min-h-screen flex-col py-15 mb-15 px-4 bg-zinc-50 dark:bg-black font-sans'>
+    <div className='flex min-h-screen flex-col py-15 pb-30   mb-15 px-4 bg-zinc-50 dark:bg-black font-sans'>
       {/* === PILIH USTADZ === */}
       <VideoAvatar loadVideos={loadVideos} />
 

@@ -2,12 +2,13 @@
 
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { Clock, Compass, Map, Video, Moon } from 'lucide-react';
+import { Clock, Compass, Map, Video, Moon, BookOpen } from 'lucide-react';
 
 const NAV_ITEMS = [
   { href: '/', label: 'Jadwal', icon: Clock },
   { href: '/compass', label: 'Kompas', icon: Compass },
   { href: '/ramadhan', label: 'Ramadhan', icon: Moon },
+  { href: '/quran', label: 'Quran', icon: BookOpen },
   { href: '/pathway', label: 'Peta', icon: Map },
   { href: '/videos', label: 'Video', icon: Video },
 ];
