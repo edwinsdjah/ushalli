@@ -43,7 +43,8 @@ export default function NotificationToggle() {
   let bgClass = 'bg-[var(--color-royal)] hover:bg-purple-700 text-white';
   if (loading) bgClass = 'bg-gray-500 cursor-not-allowed text-white';
   else if (isSubscribed)
-    bgClass = 'bg-[#F5C97A] hover:bg-[#e0b86f] text-purple-900'; // Gold with dark text
+    bgClass =
+      'bg-[var(--color-royal-accent)] hover:bg-[#e0b86f] text-purple-900'; // Gold with dark text
 
   return (
     <button
@@ -57,7 +58,6 @@ export default function NotificationToggle() {
       ) : isSubscribed ? (
         <>
           <BellRing className='w-5 h-5' />
-          <span>Aktif</span>
         </>
       ) : (
         <Bell className='w-5 h-5' />
