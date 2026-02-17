@@ -26,7 +26,7 @@ export async function POST(req) {
     }
 
     // Fetch dari Aladhan
-    const api = `https://api.aladhan.com/v1/timings?latitude=${lat}&longitude=${lon}&method=11`;
+    const api = `https://api.aladhan.com/v1/timings?latitude=${lat}&longitude=${lon}&method=20&tune=0,1,0,2,3,2,0,2,0`;
     const response = await fetchWithRetry(api);
     if (!response.ok) {
       console.error('Aladhan error:', response.status);
@@ -86,7 +86,24 @@ export async function POST(req) {
       return dt.isValid ? dt.toMillis() : null;
     };
 
+    // Calculate Imsak (10 mins before Fajr)
+    const fajrTime = DateTime.fromObject(
+      {
+        year: Number(year),
+        month: Number(month),
+        day: Number(day),
+        hour: Number(cleanTimings.fajr.split(':')[0]),
+        minute: Number(cleanTimings.fajr.split(':')[1]),
+      },
+      { zone: tz }
+    );
+    const imsakTime = fajrTime.minus({ minutes: 10 });
+    const imsakString = imsakTime.toFormat('HH:mm');
+
+    cleanTimings.imsak = imsakString;
+
     const timingsEpoch = {
+      imsak: imsakTime.toMillis(),
       fajr: convertToEpoch(cleanTimings.fajr),
       dhuhr: convertToEpoch(cleanTimings.dhuhr),
       asr: convertToEpoch(cleanTimings.asr),

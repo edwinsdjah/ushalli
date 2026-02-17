@@ -1,28 +1,29 @@
-import { NextResponse } from "next/server";
-import connect from "@/lib/mongoose";
-import Subscription from "@/models/Subscription";
-import PrayerTimes from "@/models/PrayerTimes";
-import { sendPush } from "@/lib/push";
-import { DateTime } from "luxon";
+import { NextResponse } from 'next/server';
+import connect from '@/lib/mongoose';
+import Subscription from '@/models/Subscription';
+import PrayerTimes from '@/models/PrayerTimes';
+import { sendPush } from '@/lib/push';
+import { DateTime } from 'luxon';
 
 const SECRET = process.env.PUSH_SERVER_SECRET;
 
 const PRAYER_NAME_MAP = {
-  fajr: "Subuh",
-  dhuhr: "Zuhur",
-  asr: "Asar",
-  maghrib: "Maghrib",
-  isha: "Isya",
-  sunrise: "Terbit Matahari",
+  imsak: 'Imsak',
+  fajr: 'Subuh',
+  dhuhr: 'Zuhur',
+  asr: 'Asar',
+  maghrib: 'Maghrib',
+  isha: 'Isya',
+  sunrise: 'Terbit Matahari',
 };
 
 export async function POST(req) {
   try {
     const body = await req.json().catch(() => ({}));
-    const provided = body?.secret || req.headers.get("x-cron-secret");
+    const provided = body?.secret || req.headers.get('x-cron-secret');
 
     if (!SECRET || provided !== SECRET) {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
     await connect();
@@ -34,18 +35,18 @@ export async function POST(req) {
     const sendResults = [];
 
     for (const pt of allDocs) {
-      const tz = pt.timezone || "UTC";
+      const tz = pt.timezone || 'UTC';
 
       // 📅 Hitung tanggal lokal user
       const nowUser = DateTime.now().setZone(tz);
 
-      const todayUser = nowUser.toFormat("yyyy-MM-dd");
+      const todayUser = nowUser.toFormat('yyyy-MM-dd');
 
       // Tidak cocok dengan tanggal sholat user → skip
       if (pt.date !== todayUser) continue;
 
       // 🎯 Epoch menit ini (versi user timezone)
-      const currentMinuteEpoch = nowUser.startOf("minute").toMillis();
+      const currentMinuteEpoch = nowUser.startOf('minute').toMillis();
 
       const timingsEpoch = pt.timingsEpoch || {};
       const sentFlags = pt.notificationsSent || {};
@@ -63,7 +64,7 @@ export async function POST(req) {
           const payloadObj = {
             title: `Waktu Sholat ${localName}`,
             body: `Sudah masuk waktu ${localName}.`,
-            url: "/",
+            url: '/',
             tag: `prayer-${prayerName}-${pt.date}`,
             prayer: prayerName,
             date: pt.date,
@@ -76,7 +77,7 @@ export async function POST(req) {
 
           // Kirim push
           const pushResults = await Promise.all(
-            subs.map(async (s) => {
+            subs.map(async s => {
               try {
                 const r = await sendPush(
                   { endpoint: s.endpoint, keys: s.keys || {} },
@@ -115,7 +116,7 @@ export async function POST(req) {
 
     return NextResponse.json({ ok: true, results: sendResults });
   } catch (err) {
-    console.error("cron send error:", err);
-    return NextResponse.json({ error: "Server error" }, { status: 500 });
+    console.error('cron send error:', err);
+    return NextResponse.json({ error: 'Server error' }, { status: 500 });
   }
 }

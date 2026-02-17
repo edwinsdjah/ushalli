@@ -6,7 +6,7 @@ export async function regeneratePrayerTimesForUser(user) {
   const lat = location.lat;
   const lon = location.lon;
 
-  const api = `https://api.aladhan.com/v1/timings?latitude=${lat}&longitude=${lon}&method=11`;
+  const api = `https://api.aladhan.com/v1/timings?latitude=${lat}&longitude=${lon}&method=20&tune=0,1,0,2,3,2,0,2,0`;
   const response = await fetch(api);
   const json = await response.json();
   if (!json?.data?.timings) return null;
@@ -41,6 +41,22 @@ export async function regeneratePrayerTimesForUser(user) {
         ).toMillis()
       : null;
 
+  // Calculate Imsak (10 mins before Fajr)
+  const fajrTime = DateTime.fromObject(
+    {
+      year: Number(year),
+      month: Number(month),
+      day: Number(day),
+      hour: Number(cleanTimings.fajr.split(':')[0]),
+      minute: Number(cleanTimings.fajr.split(':')[1]),
+    },
+    { zone: tz }
+  );
+  const imsakTime = fajrTime.minus({ minutes: 10 });
+  const imsakString = imsakTime.toFormat('HH:mm');
+
+  cleanTimings.imsak = imsakString;
+
   // Hanya buat epoch untuk yang perlu push notif, tidak termasuk sunrise
   const timingsEpoch = Object.fromEntries(
     Object.entries(cleanTimings)
@@ -61,6 +77,7 @@ export async function regeneratePrayerTimesForUser(user) {
         updatedAt: new Date(),
         source: 'aladhan',
         notificationsSent: {
+          imsak: false,
           fajr: false,
           dhuhr: false,
           asr: false,
