@@ -143,7 +143,7 @@ export default function RamadhanPage() {
         <h1 className='text-2xl font-bold text-center text-purple-900'>
           Jadwal Ramadhan 1447 H
         </h1>
-        <p className='text-center text- text-sm mt-1 text-purple-900'>
+        <p className='text-center text-[var(--color-royal)] text-sm mt-1'>
           {displayLoc} • Februari - Maret 2026
         </p>
       </header>
