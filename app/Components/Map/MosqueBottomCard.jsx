@@ -35,12 +35,16 @@ export default function MosqueBottomCard({
                 {mosque?.address}
               </p>
             )}
-            
+
             {isRouting && routeInfo && (
               <div className='mt-3 text-sm text-gray-700 space-y-1'>
                 <div className='flex items-center gap-2'>
                   <span className='text-gray-500'>Jarak:</span>
-                  <span className='font-medium'>{routeInfo.distance} m</span>
+                  <span className='font-medium'>
+                    {routeInfo.distance >= 1000
+                      ? (routeInfo.distance / 1000).toFixed(1) + ' km'
+                      : routeInfo.distance + ' m'}
+                  </span>
                 </div>
                 <div className='flex items-center gap-2'>
                   <span className='text-gray-500'>Estimasi:</span>

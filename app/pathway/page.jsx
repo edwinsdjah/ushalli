@@ -12,7 +12,6 @@ import MosqueMap from '../Components/Map/MosqueMap';
 import MosqueBottomCard from '../Components/Map/MosqueBottomCard';
 import MainNavigation from '../Components/MainNavigation';
 
-
 export default function Page() {
   // 🔹 ambil context
   const { coords, address } = useLocationContext();
@@ -20,19 +19,31 @@ export default function Page() {
   const [radius, setRadius] = useState(2000);
   const userPos = coords;
   const mosques = useNearbyMasjids(userPos, radius);
-  const { route, routeInfo, routeTo, clearRoute } = useRouting(userPos);
+  const { route, routeInfo, routeTo, clearRoute, isLoading, lastOrigin } =
+    useRouting(userPos);
   const [selectedMosque, setSelectedMosque] = useState(null);
+
   useEffect(() => {
-  if (!route || !routeInfo || !selectedMosque || !userPos) return;
+    if (!route || !routeInfo || !selectedMosque || !userPos || isLoading)
+      return;
 
-  const OFF_ROUTE_THRESHOLD = 40; // meter
+    // Prevent re-routing if we just calculated a route from this position (approx < 20m diff)
+    if (lastOrigin) {
+      const distFromLast = haversineDistance(lastOrigin, [
+        userPos.lat,
+        userPos.lon,
+      ]);
+      if (distFromLast < 20) return;
+    }
 
-  const distance = distanceToPolyline(route, userPos);
+    const OFF_ROUTE_THRESHOLD = 40; // meter
 
-  if (distance > OFF_ROUTE_THRESHOLD) {
-    routeTo(selectedMosque.position, routeInfo.mode);
-  }
-}, [userPos, route, routeInfo, selectedMosque]);
+    const distance = distanceToPolyline(route, userPos);
+
+    if (distance > OFF_ROUTE_THRESHOLD) {
+      routeTo(selectedMosque.position, routeInfo.mode);
+    }
+  }, [userPos, route, routeInfo, selectedMosque, isLoading, lastOrigin]);
 
   // Function update rute di bottom map
 
@@ -44,33 +55,30 @@ export default function Page() {
     // jaga-jaga agar tidak kosong
     return route.slice(Math.max(0, index));
   }, [route, userPos]);
-    // Derived route info yang selalu update saat mode berubah
+  // Derived route info yang selalu update saat mode berubah
   const derivedRouteInfo = useMemo(() => {
-  if (!routeInfo || !selectedMosque || !userPos || !route) return null;
+    if (!routeInfo || !selectedMosque || !userPos || !route) return null;
 
-  // ambil rute yang sudah dipotong
-  const activeRoute = trimmedRoute;
+    // ambil rute yang sudah dipotong
+    const activeRoute = trimmedRoute;
 
-  // hitung total jarak sepanjang polyline (meter)
-  let distance = 0;
-  for (let i = 1; i < activeRoute.length; i++) {
-    const [lat1, lon1] = activeRoute[i - 1];
-    const [lat2, lon2] = activeRoute[i];
-    distance += haversineDistance({ lat: lat1, lon: lon1 }, [lat2, lon2]);
-  }
+    // hitung total jarak sepanjang polyline (meter)
+    let distance = 0;
+    for (let i = 1; i < activeRoute.length; i++) {
+      const [lat1, lon1] = activeRoute[i - 1];
+      const [lat2, lon2] = activeRoute[i];
+      distance += haversineDistance({ lat: lat1, lon: lon1 }, [lat2, lon2]);
+    }
 
-  const SPEED = { walk: 80, bicycle: 250, drive: 600 }; // m/menit
-  const speed = SPEED[routeInfo.mode] || SPEED.bicycle;
+    const SPEED = { walk: 80, bicycle: 250, drive: 600 }; // m/menit
+    const speed = SPEED[routeInfo.mode] || SPEED.bicycle;
 
-  return {
-    ...routeInfo,
-    distance: Math.round(distance),
-    time: distance > 0 ? Math.max(1, Math.round(distance / speed)) : null,
-  };
-}, [routeInfo, selectedMosque, userPos, trimmedRoute]); // tambahkan trimmedRoute sebagai dependency
-
-
-  
+    return {
+      ...routeInfo,
+      distance: Math.round(distance),
+      time: distance > 0 ? Math.max(1, Math.round(distance / speed)) : null,
+    };
+  }, [routeInfo, selectedMosque, userPos, trimmedRoute]); // tambahkan trimmedRoute sebagai dependency
 
   const handleCancel = () => {
     clearRoute();
