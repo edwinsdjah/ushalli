@@ -7,9 +7,9 @@ import { Clock, Compass, Map, Video, Moon } from 'lucide-react';
 const NAV_ITEMS = [
   { href: '/', label: 'Jadwal', icon: Clock },
   { href: '/compass', label: 'Kompas', icon: Compass },
+  { href: '/ramadhan', label: 'Ramadhan', icon: Moon },
   { href: '/pathway', label: 'Peta', icon: Map },
   { href: '/videos', label: 'Video', icon: Video },
-  { href: '/ramadhan', label: 'Ramadhan', icon: Moon },
 ];
 
 export default function MainNavigation({ visible = true }) {
