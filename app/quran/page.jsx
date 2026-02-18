@@ -78,7 +78,7 @@ export default function QuranPage() {
         </header>
       </div>
 
-      <main className='px-2 flex flex-col gap-3'>
+      <main className='px-2 pb-30 flex flex-col gap-3'>
         {loading ? (
           <div className='flex justify-center py-20'>
             <div className='w-8 h-8 border-4 border-purple-300 border-t-[var(--color-royal)] rounded-full animate-spin'></div>
