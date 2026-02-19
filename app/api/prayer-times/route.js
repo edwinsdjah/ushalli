@@ -26,7 +26,7 @@ export async function POST(req) {
     }
 
     // Fetch dari Aladhan
-    const api = `https://api.aladhan.com/v1/timings?latitude=${lat}&longitude=${lon}&method=20&tune=0,1,0,2,3,2,0,2,0`;
+    const api = `https://api.aladhan.com/v1/timings?latitude=${lat}&longitude=${lon}&method=20&tune=0,2,0,2,3,2,0,2,0`;
     const response = await fetchWithRetry(api);
     if (!response.ok) {
       console.error('Aladhan error:', response.status);

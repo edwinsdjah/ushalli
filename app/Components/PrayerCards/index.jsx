@@ -89,7 +89,10 @@ export default function PrayerCards({ prayers, locationName }) {
           <div className='flex flex-col md:flex-row justify-between gap-6 mb-6'>
             <div>
               <p className='text-sm text-purple-700'>
-                Menuju waktu sholat{' '}
+                Menuju waktu{' '}
+                {['Imsak', 'Terbit'].includes(prayerNames[nextPrayer])
+                  ? ''
+                  : 'Sholat '}
                 <span className='font-semibold text-purple-900'>
                   {isLoading ? (
                     <SkeletonBox className='inline-block w-20 h-4 ml-1' />
