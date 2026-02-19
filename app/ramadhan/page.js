@@ -68,8 +68,8 @@ export default function RamadhanPage() {
         // Fetch Gregorian Calendar for Feb & March 2026
         // Ramadhan starts 19 Feb 2026 (Government confirmed)
         // Tune is not needed since we use Gregorian dates and just map Ramadhan days
-        const febUrl = `https://api.aladhan.com/v1/calendar/2026/2?latitude=${lat}&longitude=${lon}&method=20&tune=0,1,0,2,3,2,0,2,0`;
-        const marUrl = `https://api.aladhan.com/v1/calendar/2026/3?latitude=${lat}&longitude=${lon}&method=20&tune=0,1,0,2,3,2,0,2,0`;
+        const febUrl = `https://api.aladhan.com/v1/calendar/2026/2?latitude=${lat}&longitude=${lon}&method=20&tune=0,2,0,2,3,2,0,2,0`;
+        const marUrl = `https://api.aladhan.com/v1/calendar/2026/3?latitude=${lat}&longitude=${lon}&method=20&tune=0,2,0,2,3,2,0,2,0`;
 
         const [febRes, marRes] = await Promise.all([
           fetch(febUrl),
@@ -182,40 +182,91 @@ export default function RamadhanPage() {
                     const date = day.date.gregorian;
                     const hijri = day.date.hijri;
 
+                    // Check if date matches today
+                    // date.date format is "DD-MM-YYYY"
+                    const todayStr = new Date()
+                      .toLocaleDateString('id-ID', {
+                        day: '2-digit',
+                        month: '2-digit',
+                        year: 'numeric',
+                      })
+                      .replace(/\//g, '-'); // "19-02-2026"
+
+                    const isToday = date.date === todayStr;
                     const isEven = idx % 2 === 0;
 
                     const cleanFajr = cleanTime(t.Fajr);
-                    const imsakVal = getImsakFromFajr(cleanFajr); // manual calc consistent with app
+                    const imsakVal = getImsakFromFajr(cleanFajr);
 
                     return (
                       <tr
                         key={idx}
-                        className={isEven ? 'bg-white' : 'bg-zinc-50'}
+                        className={
+                          isToday
+                            ? 'bg-[var(--color-royal)] text-white border-2 border-[var(--color-royal-accent)] shadow-lg scale-[1.01] transform transition-all z-10 relative'
+                            : isEven
+                              ? 'bg-white'
+                              : 'bg-zinc-50'
+                        }
                       >
                         <td className='px-4 py-3 whitespace-nowrap'>
-                          <div className='font-bold text-gray-800'>
+                          <div
+                            className={`font-bold ${
+                              isToday ? 'text-white' : 'text-gray-800'
+                            }`}
+                          >
                             {hijri.day} Ram
                           </div>
-                          <div className='text-xs text-gray-500'>
+                          <div
+                            className={`text-xs ${
+                              isToday ? 'text-purple-200' : 'text-gray-500'
+                            }`}
+                          >
                             {date.day} {date.month.en.slice(0, 3)}
                           </div>
                         </td>
-                        <td className='px-4 py-3 text-center font-medium text-gray-600'>
+                        <td
+                          className={`px-4 py-3 text-center font-medium ${
+                            isToday ? 'text-white' : 'text-gray-600'
+                          }`}
+                        >
                           {imsakVal}
                         </td>
-                        <td className='px-4 py-3 text-center font-medium text-gray-600'>
+                        <td
+                          className={`px-4 py-3 text-center font-medium ${
+                            isToday ? 'text-white' : 'text-gray-600'
+                          }`}
+                        >
                           {cleanFajr}
                         </td>
-                        <td className='px-4 py-3 text-center text-gray-500'>
+                        <td
+                          className={`px-4 py-3 text-center ${
+                            isToday ? 'text-white' : 'text-gray-500'
+                          }`}
+                        >
                           {cleanTime(t.Dhuhr)}
                         </td>
-                        <td className='px-4 py-3 text-center text-gray-500'>
+                        <td
+                          className={`px-4 py-3 text-center ${
+                            isToday ? 'text-white' : 'text-gray-500'
+                          }`}
+                        >
                           {cleanTime(t.Asr)}
                         </td>
-                        <td className='px-4 py-3 text-center font-bold text-purple-700 bg-purple-50/50'>
+                        <td
+                          className={`px-4 py-3 text-center font-bold ${
+                            isToday
+                              ? 'text-[var(--color-royal-accent)]'
+                              : 'text-purple-700 bg-purple-50/50'
+                          }`}
+                        >
                           {cleanTime(t.Maghrib)}
                         </td>
-                        <td className='px-4 py-3 text-center text-gray-500'>
+                        <td
+                          className={`px-4 py-3 text-center ${
+                            isToday ? 'text-white' : 'text-gray-500'
+                          }`}
+                        >
                           {cleanTime(t.Isha)}
                         </td>
                       </tr>
