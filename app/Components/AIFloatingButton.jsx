@@ -15,7 +15,7 @@ export default function AIFloatingButton() {
       onClick={() => router.push('/tanya-ai')}
       aria-label='Tanya AI'
       className='
-        fixed bottom-[96px] right-5 z-[999]
+        fixed bottom-[96px] right-5 z-[99999]
         w-13 h-13
         flex items-center justify-center
         rounded-full

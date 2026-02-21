@@ -76,6 +76,7 @@ export default function TanyaAIPage() {
   const [input, setInput] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [isListening, setIsListening] = useState(false);
+  const [interimText, setInterimText] = useState('');
   const [error, setError] = useState(null);
 
   const messagesEndRef = useRef(null);
@@ -96,44 +97,96 @@ export default function TanyaAIPage() {
 
   // Voice input
   const toggleVoice = () => {
-    if (
-      !('SpeechRecognition' in window || 'webkitSpeechRecognition' in window)
-    ) {
-      setError('Browser kamu tidak mendukung input suara.');
+    if (typeof window === 'undefined') return;
+
+    const SpeechRecognitionAPI =
+      window.SpeechRecognition || window.webkitSpeechRecognition;
+
+    if (!SpeechRecognitionAPI) {
+      setError(
+        'Browser kamu tidak mendukung input suara. Gunakan Chrome atau Safari.'
+      );
       return;
     }
 
+    // Stop if already listening
     if (isListening) {
       recognitionRef.current?.stop();
-      setIsListening(false);
       return;
     }
 
-    const SpeechRecognition =
-      window.SpeechRecognition || window.webkitSpeechRecognition;
-    const recognition = new SpeechRecognition();
-    recognition.lang = 'id-ID';
-    recognition.continuous = false;
-    recognition.interimResults = false;
+    setError(null);
+    setInterimText('');
 
-    recognition.onstart = () => setIsListening(true);
-    recognition.onend = () => setIsListening(false);
-    recognition.onerror = () => {
-      setIsListening(false);
-      setError('Gagal menangkap suara. Coba lagi.');
+    const recognition = new SpeechRecognitionAPI();
+    recognition.lang = 'id-ID';
+    recognition.continuous = true; // keep mic open until user clicks stop
+    recognition.interimResults = true; // show real-time partial results
+    recognition.maxAlternatives = 1;
+
+    recognition.onstart = () => {
+      setIsListening(true);
+      setInterimText('');
     };
+
     recognition.onresult = e => {
-      const transcript = e.results[0][0].transcript;
-      setInput(prev => (prev ? prev + ' ' + transcript : transcript));
-      if (textareaRef.current) {
-        textareaRef.current.style.height = 'auto';
-        textareaRef.current.style.height =
-          Math.min(textareaRef.current.scrollHeight, 120) + 'px';
+      let interim = '';
+      let final = '';
+      for (let i = e.resultIndex; i < e.results.length; i++) {
+        const t = e.results[i][0].transcript;
+        if (e.results[i].isFinal) {
+          final += t;
+        } else {
+          interim += t;
+        }
       }
+      // Append finalized text to input
+      if (final) {
+        setInput(prev => {
+          const next = prev ? prev + ' ' + final.trim() : final.trim();
+          // Update textarea height
+          setTimeout(() => {
+            if (textareaRef.current) {
+              textareaRef.current.style.height = 'auto';
+              textareaRef.current.style.height =
+                Math.min(textareaRef.current.scrollHeight, 120) + 'px';
+            }
+          }, 0);
+          return next;
+        });
+      }
+      // Show live interim text
+      setInterimText(interim);
+    };
+
+    recognition.onerror = e => {
+      setIsListening(false);
+      setInterimText('');
+      const errorMessages = {
+        'not-allowed':
+          'Izin mikrofon ditolak. Aktifkan akses mikrofon di pengaturan browser.',
+        'no-speech': 'Tidak ada suara yang terdeteksi. Coba lagi.',
+        'audio-capture':
+          'Mikrofon tidak ditemukan. Pastikan perangkat memiliki mikrofon.',
+        network: 'Pengenalan suara gagal. Coba lagi.',
+        aborted: null, // user cancelled, no message needed
+      };
+      const msg = errorMessages[e.error];
+      if (msg) setError(msg);
+    };
+
+    recognition.onend = () => {
+      setIsListening(false);
+      setInterimText('');
     };
 
     recognitionRef.current = recognition;
-    recognition.start();
+    try {
+      recognition.start();
+    } catch (err) {
+      setIsListening(false);
+      setError('Gagal memulai pengenalan suara. Coba lagi.');
+    }
   };
 
   const sendMessage = async text => {
@@ -224,7 +277,7 @@ export default function TanyaAIPage() {
   return (
     <div className='flex flex-col min-h-screen bg-zinc-50'>
       {/* Page Header */}
-      <div className=' w-full bg-white border-b border-gray-100 shadow-sm'>
+      <div className='pt-15 w-full bg-white border-b border-gray-100 shadow-sm'>
         <div className='max-w-3xl mx-auto px-4 py-3 flex items-center gap-3'>
           <div className='w-9 h-9 rounded-xl bg-gradient-to-br from-[#7c3aed] to-[#5b2d8b] flex items-center justify-center shadow'>
             <Sparkles size={18} className='text-white' />
@@ -348,10 +401,26 @@ export default function TanyaAIPage() {
               )}
             </button>
           </div>
+
+          {/* Interim transcript preview */}
           {isListening && (
-            <p className='text-center text-xs text-red-500 mt-1 animate-pulse'>
-              🔴 Sedang merekam... klik mic untuk berhenti
-            </p>
+            <div className='mt-1.5 px-3 py-2 bg-red-50 rounded-xl border border-red-100 flex items-start gap-2'>
+              <span className='w-2 h-2 mt-1 rounded-full bg-red-500 flex-shrink-0 animate-pulse' />
+              <div className='flex-1 min-w-0'>
+                {interimText ? (
+                  <p className='text-xs text-gray-600 italic truncate'>
+                    "{interimText}..."
+                  </p>
+                ) : (
+                  <p className='text-xs text-gray-400'>
+                    Mendengarkan... ucapkan pertanyaanmu
+                  </p>
+                )}
+                <p className='text-[10px] text-red-400 mt-0.5'>
+                  Klik 🎙️ lagi untuk berhenti
+                </p>
+              </div>
+            </div>
           )}
         </div>
       </div>
