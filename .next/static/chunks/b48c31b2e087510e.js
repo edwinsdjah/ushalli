@@ -1,0 +1,1 @@
+(globalThis.TURBOPACK||(globalThis.TURBOPACK=[])).push(["object"==typeof document?document.currentScript:void 0,33193,e=>{"use strict";function t(e=!1){let l=localStorage.getItem("ushalli_user_id");return e?l||null:(l||(l=crypto.randomUUID(),localStorage.setItem("ushalli_user_id",l)),l)}e.s(["getOrCreateUserId",()=>t])}]);

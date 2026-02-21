@@ -4,6 +4,7 @@ import ServiceWorkerRegister from '@/app/Components/serviceWorkerRegister';
 import { LocationProvider } from './context/locationContext';
 import { PushProvider } from './context/pushContext';
 import Navbar from './Components/Navbar';
+import AIFloatingButton from './Components/AIFloatingButton';
 
 const geistSans = Geist({
   variable: '--font-geist-sans',
@@ -59,6 +60,7 @@ export default function RootLayout({ children }) {
             <PushProvider>
               <ServiceWorkerRegister />
               <Navbar />
+              <AIFloatingButton />
               {children}
             </PushProvider>
           </LocationProvider>
