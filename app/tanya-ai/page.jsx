@@ -168,7 +168,7 @@ export default function TanyaAIPage() {
         'no-speech': 'Tidak ada suara yang terdeteksi. Coba lagi.',
         'audio-capture':
           'Mikrofon tidak ditemukan. Pastikan perangkat memiliki mikrofon.',
-        network: 'Koneksi internet diperlukan untuk pengenalan suara.',
+        network: 'Pengenalan suara gagal. Coba lagi.',
         aborted: null, // user cancelled, no message needed
       };
       const msg = errorMessages[e.error];
