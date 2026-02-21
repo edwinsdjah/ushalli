@@ -1,0 +1,3 @@
+{
+  "/api/vapid-public-key/route": "app/api/vapid-public-key/route.js"
+}

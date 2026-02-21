@@ -1,0 +1,191 @@
+{
+  "version": 3,
+  "pages404": true,
+  "caseSensitive": false,
+  "basePath": "",
+  "redirects": [
+    {
+      "source": "/:path+/",
+      "destination": "/:path+",
+      "internal": true,
+      "priority": true,
+      "statusCode": 308,
+      "regex": "^(?:/((?:[^/]+?)(?:/(?:[^/]+?))*))/$"
+    }
+  ],
+  "headers": [],
+  "rewrites": {
+    "beforeFiles": [],
+    "afterFiles": [],
+    "fallback": []
+  },
+  "dynamicRoutes": [
+    {
+      "page": "/quran/[nomor]",
+      "regex": "^/quran/([^/]+?)(?:/)?$",
+      "routeKeys": {
+        "nxtPnomor": "nxtPnomor"
+      },
+      "namedRegex": "^/quran/(?<nxtPnomor>[^/]+?)(?:/)?$"
+    }
+  ],
+  "staticRoutes": [
+    {
+      "page": "/",
+      "regex": "^/(?:/)?$",
+      "routeKeys": {},
+      "namedRegex": "^/(?:/)?$"
+    },
+    {
+      "page": "/_global-error",
+      "regex": "^/_global\\-error(?:/)?$",
+      "routeKeys": {},
+      "namedRegex": "^/_global\\-error(?:/)?$"
+    },
+    {
+      "page": "/_not-found",
+      "regex": "^/_not\\-found(?:/)?$",
+      "routeKeys": {},
+      "namedRegex": "^/_not\\-found(?:/)?$"
+    },
+    {
+      "page": "/api/ai-chat",
+      "regex": "^/api/ai\\-chat(?:/)?$",
+      "routeKeys": {},
+      "namedRegex": "^/api/ai\\-chat(?:/)?$"
+    },
+    {
+      "page": "/api/cron/regenerate",
+      "regex": "^/api/cron/regenerate(?:/)?$",
+      "routeKeys": {},
+      "namedRegex": "^/api/cron/regenerate(?:/)?$"
+    },
+    {
+      "page": "/api/cron/send",
+      "regex": "^/api/cron/send(?:/)?$",
+      "routeKeys": {},
+      "namedRegex": "^/api/cron/send(?:/)?$"
+    },
+    {
+      "page": "/api/cron/update-ustadz",
+      "regex": "^/api/cron/update\\-ustadz(?:/)?$",
+      "routeKeys": {},
+      "namedRegex": "^/api/cron/update\\-ustadz(?:/)?$"
+    },
+    {
+      "page": "/api/prayer-times",
+      "regex": "^/api/prayer\\-times(?:/)?$",
+      "routeKeys": {},
+      "namedRegex": "^/api/prayer\\-times(?:/)?$"
+    },
+    {
+      "page": "/api/push/send",
+      "regex": "^/api/push/send(?:/)?$",
+      "routeKeys": {},
+      "namedRegex": "^/api/push/send(?:/)?$"
+    },
+    {
+      "page": "/api/push/status",
+      "regex": "^/api/push/status(?:/)?$",
+      "routeKeys": {},
+      "namedRegex": "^/api/push/status(?:/)?$"
+    },
+    {
+      "page": "/api/push/subscribe",
+      "regex": "^/api/push/subscribe(?:/)?$",
+      "routeKeys": {},
+      "namedRegex": "^/api/push/subscribe(?:/)?$"
+    },
+    {
+      "page": "/api/push/unsubscribe",
+      "regex": "^/api/push/unsubscribe(?:/)?$",
+      "routeKeys": {},
+      "namedRegex": "^/api/push/unsubscribe(?:/)?$"
+    },
+    {
+      "page": "/api/reverse-geocode",
+      "regex": "^/api/reverse\\-geocode(?:/)?$",
+      "routeKeys": {},
+      "namedRegex": "^/api/reverse\\-geocode(?:/)?$"
+    },
+    {
+      "page": "/api/ustadz/random-videos",
+      "regex": "^/api/ustadz/random\\-videos(?:/)?$",
+      "routeKeys": {},
+      "namedRegex": "^/api/ustadz/random\\-videos(?:/)?$"
+    },
+    {
+      "page": "/api/ustadz/videos",
+      "regex": "^/api/ustadz/videos(?:/)?$",
+      "routeKeys": {},
+      "namedRegex": "^/api/ustadz/videos(?:/)?$"
+    },
+    {
+      "page": "/api/vapid-public-key",
+      "regex": "^/api/vapid\\-public\\-key(?:/)?$",
+      "routeKeys": {},
+      "namedRegex": "^/api/vapid\\-public\\-key(?:/)?$"
+    },
+    {
+      "page": "/compass",
+      "regex": "^/compass(?:/)?$",
+      "routeKeys": {},
+      "namedRegex": "^/compass(?:/)?$"
+    },
+    {
+      "page": "/favicon.ico",
+      "regex": "^/favicon\\.ico(?:/)?$",
+      "routeKeys": {},
+      "namedRegex": "^/favicon\\.ico(?:/)?$"
+    },
+    {
+      "page": "/pathway",
+      "regex": "^/pathway(?:/)?$",
+      "routeKeys": {},
+      "namedRegex": "^/pathway(?:/)?$"
+    },
+    {
+      "page": "/quran",
+      "regex": "^/quran(?:/)?$",
+      "routeKeys": {},
+      "namedRegex": "^/quran(?:/)?$"
+    },
+    {
+      "page": "/ramadhan",
+      "regex": "^/ramadhan(?:/)?$",
+      "routeKeys": {},
+      "namedRegex": "^/ramadhan(?:/)?$"
+    },
+    {
+      "page": "/tanya-ai",
+      "regex": "^/tanya\\-ai(?:/)?$",
+      "routeKeys": {},
+      "namedRegex": "^/tanya\\-ai(?:/)?$"
+    },
+    {
+      "page": "/videos",
+      "regex": "^/videos(?:/)?$",
+      "routeKeys": {},
+      "namedRegex": "^/videos(?:/)?$"
+    }
+  ],
+  "dataRoutes": [],
+  "rsc": {
+    "header": "rsc",
+    "varyHeader": "rsc, next-router-state-tree, next-router-prefetch, next-router-segment-prefetch",
+    "prefetchHeader": "next-router-prefetch",
+    "didPostponeHeader": "x-nextjs-postponed",
+    "contentTypeHeader": "text/x-component",
+    "suffix": ".rsc",
+    "prefetchSuffix": ".prefetch.rsc",
+    "prefetchSegmentHeader": "next-router-segment-prefetch",
+    "prefetchSegmentSuffix": ".segment.rsc",
+    "prefetchSegmentDirSuffix": ".segments",
+    "clientParamParsing": false,
+    "dynamicRSCPrerender": false
+  },
+  "rewriteHeaders": {
+    "pathHeader": "x-nextjs-rewritten-path",
+    "queryHeader": "x-nextjs-rewritten-query"
+  }
+}
