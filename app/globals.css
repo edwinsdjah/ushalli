@@ -79,6 +79,7 @@
   --radius-md: calc(var(--radius) - 2px);
   --radius-lg: var(--radius);
   --radius-xl: calc(var(--radius) + 4px);
+  --font-amiri: var(--font-amiri);
 }
 
 @media (prefers-color-scheme: dark) {
@@ -135,6 +136,20 @@ body {
 
 .no-scrollbar::-webkit-scrollbar {
   display: none; /* Chrome, Safari */
+}
+
+/* Arabic text rendering — ensures harakat (kasrah, fathah, etc.) display correctly on all devices */
+.font-amiri {
+  font-family: var(--font-amiri), 'Amiri', serif;
+  direction: rtl;
+  unicode-bidi: bidi-override;
+  font-feature-settings:
+    'mark' 1,
+    'mkmk' 1,
+    'calt' 1,
+    'kern' 1;
+  text-rendering: optimizeLegibility;
+  -webkit-font-smoothing: antialiased;
 }
 
 /* globals.css */

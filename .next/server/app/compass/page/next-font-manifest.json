@@ -3,7 +3,9 @@
   "app": {
     "[project]/app/compass/page": [
       "static/media/caa3a2e1cccd8315-s.p.853070df.woff2",
-      "static/media/797e433ab948586e-s.p.dbea232f.woff2"
+      "static/media/797e433ab948586e-s.p.dbea232f.woff2",
+      "static/media/05d29f0ed5b0e698-s.p.6d7a8113.woff2",
+      "static/media/291696193ea1e96b-s.p.6ef5e8dc.woff2"
     ]
   },
   "appUsingSizeAdjust": true,

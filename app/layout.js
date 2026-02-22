@@ -1,4 +1,4 @@
-import { Geist, Geist_Mono } from 'next/font/google';
+import { Geist, Geist_Mono, Amiri } from 'next/font/google';
 import './globals.css';
 import ServiceWorkerRegister from '@/app/Components/serviceWorkerRegister';
 import { LocationProvider } from './context/locationContext';
@@ -16,9 +16,16 @@ const geistMono = Geist_Mono({
   subsets: ['latin'],
 });
 
+const amiri = Amiri({
+  variable: '--font-amiri',
+  subsets: ['arabic'],
+  weight: ['400', '700'],
+  display: 'swap',
+});
+
 export default function RootLayout({ children }) {
   return (
-    <html lang='en'>
+    <html lang='en' className={amiri.variable}>
       <head>
         <link rel='manifest' href='/manifest.json' />
         <meta
@@ -53,7 +60,7 @@ export default function RootLayout({ children }) {
         />
       </head>
       <body
-        className={`${geistSans.variable} ${geistMono.variable} antialiased pwa-body`}
+        className={`${geistSans.variable} ${geistMono.variable} ${amiri.variable} antialiased pwa-body`}
       >
         <div className='pwa-body'>
           <LocationProvider>
